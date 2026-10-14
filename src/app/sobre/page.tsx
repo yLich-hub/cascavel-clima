@@ -88,9 +88,12 @@ export default function AboutPage() {
 
       <Section id="atualizacao" title="Atualização e dados desatualizados">
         <P>
-          O site busca dados novos no máximo a cada {duration(CACHE_TTL_SECONDS / 60)}. Cada bloco
-          mostra o horário a que os dados se referem e há quanto tempo foram obtidos:
+          Os dados ficam guardados no servidor e são compartilhados entre todas as visitas: o
+          site busca dados novos no máximo a cada {duration(CACHE_TTL_SECONDS / 60)}, não importa
+          quantas pessoas acessem. Depois de cada nova publicação do site, a primeira visita busca
+          dados novos.
         </P>
+        <P>Cada bloco mostra o horário a que os dados se referem e há quanto tempo foram obtidos:</P>
         <ul className="mt-2 list-disc space-y-1.5 pl-5 text-sm text-zinc-700">
           <li>
             <strong>Condições atuais:</strong> aviso de possível desatualização após{" "}
@@ -102,9 +105,9 @@ export default function AboutPage() {
             deixa de ser exibida após {duration(FRESHNESS.forecast.expiredAfterMin)}.
           </li>
           <li>
-            Se o provedor falhar, mostramos os últimos dados obtidos com um aviso e o horário
-            real deles. Sem nenhum dado disponível, mostramos &quot;indisponível&quot;, nunca
-            valores de exemplo.
+            Se o provedor falhar, continuamos mostrando os últimos dados obtidos, com o horário
+            real deles e os avisos acima quando ficarem velhos. Sem nenhum dado disponível,
+            mostramos &quot;indisponível&quot;, nunca valores de exemplo.
           </li>
         </ul>
       </Section>

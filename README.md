@@ -8,7 +8,7 @@ educativo sobre El Niño. Projeto de portfólio, sem fins comerciais.
 > handling of stale data and provider failures, and a strict separation between
 > forecasts, official alerts and El Niño climate context.
 
-**Status:** Etapas 0–5 de 6 concluídas. Falta o deploy (Etapa 6).
+**Status:** v1 publicada em **https://cascavel-clima.vercel.app** (Etapas 0–6 concluídas).
 
 ## Princípios
 
@@ -46,8 +46,11 @@ Três camadas de proteção contra dado ruim ou velho:
 
 1. **Serviço** (`src/lib/weather/service.ts`): timeout de 8 s, uma retentativa só
    para erros transitórios, último dado bom em memória como fallback.
-2. **Cache do Next** (`get-weather.ts`, `"use cache"`): no máximo uma chamada ao
-   provedor a cada 10 min; falhas nunca entram no cache.
+2. **Cache remoto** (`get-weather.ts`, `"use cache: remote"`, Runtime Cache da
+   Vercel): no máximo uma chamada ao provedor a cada 10 min, compartilhada entre
+   todas as instâncias; falhas nunca entram no cache. O `"use cache"` comum
+   (em memória) não bastava na Vercel: verificado no site publicado, cada visita
+   chamava o Open-Meteo. O cache remoto recomeça a cada novo deploy.
 3. **Visão por requisição** (`freshness.ts`): idade calculada a cada acesso; dado
    expirado some da tela e da API; horas e dias passados são removidos.
 
@@ -68,13 +71,13 @@ Três camadas de proteção contra dado ruim ou velho:
   meia-noite, regras de frescor, retentativa e fallback, estados da tela
   (fresco, velho, expirado, indisponível), conteúdo do El Niño e uma varredura
   de frases proibidas ("sem alertas", "causado pelo El Niño"…).
-- **Lighthouse** (celular, build de produção, 14/10/2026):
+- **Lighthouse** (celular, site publicado em cascavel-clima.vercel.app, 14/10/2026):
 
   | Página | Performance | Acessibilidade | Boas práticas | SEO |
   |---|---|---|---|---|
-  | Início | 97 | 100 | 100 | 100 |
-  | Sobre | 98 | 100 | 100 | 100 |
-  | El Niño | 97 | 100 | 100 | 100 |
+  | Início | 99 | 100 | 100 | 100 |
+  | Sobre | 100 | 100 | 100 | 100 |
+  | El Niño | 100 | 100 | 100 | 100 |
 
 - **Segredos:** nenhuma chave no projeto; o JavaScript enviado ao navegador não
   contém referências ao provedor nem padrões de chave/token.
@@ -143,4 +146,4 @@ assinatura, os planos grátis do Open-Meteo e da Vercel deixam de valer.
 3. ✅ Tela Início
 4. ✅ Página Sobre/Fontes + atribuição + bloco de alertas
 5. ✅ Página El Niño (conteúdo revisado pelo autor)
-6. Deploy na Vercel + verificação de segredos no bundle + Lighthouse
+6. ✅ Deploy na Vercel + verificação de segredos no bundle + Lighthouse
