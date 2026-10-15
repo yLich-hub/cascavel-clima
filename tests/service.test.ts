@@ -4,6 +4,13 @@ import {
   parseOpenMeteoResponse,
   type OpenMeteoResponse,
 } from "@/lib/providers/open-meteo";
+import {
+  isWeatherReport,
+  memoryStore,
+  runtimeCacheStore,
+  type LastGoodStore,
+} from "@/lib/weather/last-good-store";
+import { normalizeOpenMeteo } from "@/lib/weather/normalize";
 import { WeatherUnavailableError, createWeatherService } from "@/lib/weather/service";
 import fixture from "./fixtures/open-meteo-cascavel.json";
 
@@ -21,7 +28,7 @@ function scriptedProvider(script: Array<OpenMeteoResponse | Error>) {
   return { fetchRaw, calls: () => calls };
 }
 
-function setup(script: Array<OpenMeteoResponse | Error>) {
+function setup(script: Array<OpenMeteoResponse | Error>, store: LastGoodStore = memoryStore()) {
   const provider = scriptedProvider(script);
   const logs: string[] = [];
   const sleeps: number[] = [];
@@ -31,6 +38,7 @@ function setup(script: Array<OpenMeteoResponse | Error>) {
     now: () => clock,
     sleep: async (ms) => void sleeps.push(ms),
     log: (message) => void logs.push(message),
+    store,
   });
   return {
     service,
@@ -114,5 +122,81 @@ describe("weather service", () => {
     const { service } = setup([new TypeError("fetch failed"), new TypeError("fetch failed")]);
     const error = (await service.load().catch((e: unknown) => e)) as WeatherUnavailableError;
     expect(error.providerError.kind).toBe("network");
+  });
+});
+
+describe("último dado bom compartilhado (Runtime Cache)", () => {
+  const report = (fetchedAt: string) => normalizeOpenMeteo(raw(), new Date(fetchedAt));
+
+  it("grava no store a cada busca bem-sucedida", async () => {
+    const store = memoryStore();
+    const { service } = setup([raw()], store);
+    await service.load();
+    expect((await store.get())?.meta.fetchedAt).toBe("2026-10-14T18:20:00.000Z");
+  });
+
+  it("instância nova, sem memória, usa o dado gravado por outra instância", async () => {
+    // Cenário da Vercel: a instância que buscou o dado já foi descartada.
+    const store = memoryStore(report("2026-10-14T17:00:00Z"));
+    const { service } = setup([http(503), http(503)], store);
+    const result = await service.load();
+    expect(result.servedFrom).toBe("fallback");
+    expect(result.report.meta.fetchedAt).toBe("2026-10-14T17:00:00.000Z");
+  });
+
+  it("entre memória e store, usa o dado mais recente", async () => {
+    const store = memoryStore();
+    const { service, advance } = setup([raw(), http(503), http(503)], store);
+    await service.load(); // memória e store: 18:20
+    await store.set(report("2026-10-14T18:50:00Z")); // outra instância gravou algo mais novo
+    advance(40);
+    const result = await service.load();
+    expect(result.report.meta.fetchedAt).toBe("2026-10-14T18:50:00.000Z");
+  });
+
+  it("falha ao gravar no store não derruba a resposta ao vivo", async () => {
+    const broken: LastGoodStore = {
+      get: async () => null,
+      set: async () => {
+        throw new Error("runtime cache fora do ar");
+      },
+    };
+    const { service, logs } = setup([raw()], broken);
+    expect((await service.load()).servedFrom).toBe("live");
+    expect(logs.some((line) => line.includes("não foi possível gravar"))).toBe(true);
+  });
+
+  it("falha ao ler o store com provedor fora do ar resulta em 'indisponível', sem travar", async () => {
+    const broken: LastGoodStore = {
+      get: async () => {
+        throw new Error("runtime cache fora do ar");
+      },
+      set: async () => {},
+    };
+    const { service, logs } = setup([timeout(), timeout()], broken);
+    await expect(service.load()).rejects.toBeInstanceOf(WeatherUnavailableError);
+    expect(logs.some((line) => line.includes("não foi possível ler"))).toBe(true);
+  });
+});
+
+describe("isWeatherReport", () => {
+  it("aceita um relatório normalizado", () => {
+    expect(isWeatherReport(normalizeOpenMeteo(raw(), new Date()))).toBe(true);
+  });
+
+  it.each([null, "texto", 42, {}, { meta: { fetchedAt: "x" } }])(
+    "rejeita dado em formato inesperado: %j",
+    (value) => {
+      expect(isWeatherReport(value)).toBe(false);
+    },
+  );
+});
+
+describe("runtimeCacheStore (getCache real, em memória fora da Vercel)", () => {
+  it("grava e lê de volta o relatório", async () => {
+    const store = runtimeCacheStore();
+    const report = normalizeOpenMeteo(raw(), new Date("2026-10-14T18:20:00Z"));
+    await store.set(report);
+    expect(await store.get()).toEqual(report);
   });
 });

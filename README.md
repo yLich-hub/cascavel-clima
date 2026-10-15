@@ -45,7 +45,9 @@ Navegador ──▶ Next.js (servidor, Vercel) ──▶ cache (10 min) ──�
 Três camadas de proteção contra dado ruim ou velho:
 
 1. **Serviço** (`src/lib/weather/service.ts`): timeout de 8 s, uma retentativa só
-   para erros transitórios, último dado bom em memória como fallback.
+   para erros transitórios. O último dado bom fica no Runtime Cache da Vercel
+   (`last-good-store.ts`, compartilhado entre instâncias, válido por 24 h) e é
+   usado como fallback se o provedor falhar.
 2. **Cache remoto** (`get-weather.ts`, `"use cache: remote"`, Runtime Cache da
    Vercel): no máximo uma chamada ao provedor a cada 10 min, compartilhada entre
    todas as instâncias; falhas nunca entram no cache. O `"use cache"` comum
@@ -67,10 +69,19 @@ Três camadas de proteção contra dado ruim ou velho:
 
 ## Qualidade
 
-- **119 testes** cobrindo: validação do provedor, normalização, fuso perto da
-  meia-noite, regras de frescor, retentativa e fallback, estados da tela
-  (fresco, velho, expirado, indisponível), conteúdo do El Niño e uma varredura
-  de frases proibidas ("sem alertas", "causado pelo El Niño"…).
+- **139 testes** cobrindo: validação do provedor, normalização, fuso perto da
+  meia-noite, regras de frescor, retentativa e fallback compartilhado, estados
+  da tela (fresco, velho, expirado, indisponível), acessibilidade da lista de
+  horas, conteúdo do El Niño, página 404, avaliação do monitoramento e uma
+  varredura de frases proibidas ("sem alertas", "causado pelo El Niño"…).
+- **CI** (`.github/workflows/ci.yml`): lint, tipos, testes e build em todo push e PR.
+- **Monitoramento** (`.github/workflows/monitor.yml` + `scripts/check-health.mjs`):
+  a cada 30 min verifica as páginas e a API publicadas; se algo cair ou a
+  previsão ficar velha, a execução falha e o GitHub avisa por e-mail. Rodar à
+  mão: `node scripts/check-health.mjs`. O GitHub desativa agendamentos de
+  repositórios públicos após 60 dias sem commits (reativar na aba Actions).
+- **Segurança:** cabeçalhos CSP (parcial), HSTS, `nosniff`, `X-Frame-Options`,
+  `Referrer-Policy` e `Permissions-Policy` em todas as respostas (`next.config.ts`).
 - **Lighthouse** (celular, site publicado em cascavel-clima.vercel.app, 14/10/2026):
 
   | Página | Performance | Acessibilidade | Boas práticas | SEO |
@@ -87,7 +98,11 @@ Três camadas de proteção contra dado ruim ou velho:
 1. Crie uma conta em [vercel.com](https://vercel.com) entrando com o GitHub.
 2. **Add New → Project**, importe este repositório e mantenha as opções padrão
    (o framework Next.js é detectado sozinho). Não há variáveis de ambiente.
-3. Cada `git push` na branch `main` publica uma nova versão.
+3. Cada `git push` na branch `main` publica uma nova versão; outras branches
+   geram uma versão de prévia com endereço próprio.
+4. Recomendado: no GitHub, **Settings → Branches → Add branch ruleset** para a
+   `main`, exigindo que o check **CI** passe antes de mesclar um pull request.
+   Assim nenhuma mudança com teste quebrado chega ao site.
 
 ## Escopo da v1
 

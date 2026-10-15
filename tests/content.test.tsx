@@ -106,3 +106,13 @@ describe("Página Sobre", () => {
     expect(html).toContain("CC BY 4.0");
   });
 });
+
+describe("página 404", () => {
+  it("está em português e leva de volta às páginas do site", async () => {
+    const { default: NotFound } = await import("@/app/not-found");
+    const html = renderToStaticMarkup(<NotFound />);
+    expect(html).toContain("Página não encontrada");
+    for (const href of ["/", "/el-nino", "/sobre"]) expect(html).toContain(`href="${href}"`);
+    expect(html).not.toMatch(/could not be found/i);
+  });
+});

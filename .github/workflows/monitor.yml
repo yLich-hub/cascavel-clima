@@ -1,0 +1,29 @@
+# Verifica o site publicado a cada 30 minutos. Se algo estiver errado, a
+# execução falha e o GitHub envia e-mail para o dono do repositório
+# (Settings → Notifications → Actions no GitHub).
+#
+# Atenção: o GitHub desativa workflows agendados de repositórios públicos
+# após 60 dias sem nenhum commit. Para reativar: aba Actions → Monitor → Enable.
+name: Monitor
+
+on:
+  schedule:
+    - cron: "*/30 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  saude:
+    name: Saúde do site publicado
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: node scripts/check-health.mjs
+        env:
+          SITE_URL: https://cascavel-clima.vercel.app

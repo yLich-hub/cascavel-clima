@@ -17,11 +17,19 @@ export function HourlyList({ hourly }: { hourly: HourlyPoint[] }) {
         </p>
       ) : (
         <>
-          <ol className="-mx-5 mt-3 flex snap-x gap-2 overflow-x-auto px-5 pb-2">
-            {hourly.map((point) => (
-              <HourItem key={point.time} point={point} />
-            ))}
-          </ol>
+          {/* Região rolável focável: sem tabIndex, quem usa só teclado não consegue rolar a lista. */}
+          <div
+            role="region"
+            aria-labelledby="proximas-horas"
+            tabIndex={0}
+            className="-mx-5 mt-2 overflow-x-auto px-5 pt-1 pb-2 outline-none focus-visible:ring-2 focus-visible:ring-sky-600 focus-visible:ring-inset"
+          >
+            <ol className="flex snap-x gap-2">
+              {hourly.map((point) => (
+                <HourItem key={point.time} point={point} />
+              ))}
+            </ol>
+          </div>
           <p className="mt-1 text-xs text-zinc-600">
             Chance de chuva: probabilidade de mais de 0,1 mm na hora que termina no horário indicado.
           </p>
