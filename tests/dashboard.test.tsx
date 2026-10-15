@@ -82,3 +82,10 @@ describe("WeatherUnavailable", () => {
     expect(html).not.toMatch(/\d+°/);
   });
 });
+
+describe("acessibilidade da lista de horas", () => {
+  it("a região rolável recebe foco pelo teclado e tem nome acessível", () => {
+    const html = render(0);
+    expect(html).toMatch(/<div role="region" aria-labelledby="proximas-horas" tabindex="0"/);
+  });
+});
