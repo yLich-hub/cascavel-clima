@@ -8,7 +8,6 @@ educativo sobre El Niño. Projeto de portfólio, sem fins comerciais.
 > handling of stale data and provider failures, and a strict separation between
 > forecasts, official alerts and El Niño climate context.
 
-**Status:** v1 publicada em **https://cascavel-clima.vercel.app** (Etapas 0–6 concluídas).
 
 ## Princípios
 
