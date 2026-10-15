@@ -4,8 +4,8 @@ import { ATTRIBUTION } from "@/lib/config";
 export function SiteFooter() {
   const { openMeteo } = ATTRIBUTION;
   return (
-    <footer className="border-t border-zinc-200 bg-white">
-      <div className="mx-auto w-full max-w-xl space-y-2 px-4 py-5 text-xs text-zinc-600">
+    <footer className="site-footer border-t">
+      <div className="site-nav mx-auto w-full max-w-6xl space-y-2 px-4 py-5 text-xs text-white">
         <p>
           Dados meteorológicos:{" "}
           <a href={openMeteo.url} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2">

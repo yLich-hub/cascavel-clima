@@ -27,6 +27,7 @@ const HOURLY_VARS = [
   "precipitation",
   "weather_code",
   "is_day",
+  "wind_speed_10m",
 ] as const;
 
 const DAILY_VARS = [
@@ -35,6 +36,9 @@ const DAILY_VARS = [
   "temperature_2m_min",
   "precipitation_sum",
   "precipitation_probability_max",
+  "sunrise",
+  "sunset",
+  "uv_index_max",
 ] as const;
 
 export function buildOpenMeteoUrl(): string {
@@ -64,6 +68,8 @@ const wmoCode = z.number().int().min(0).max(99);
 const temperature = z.number().min(-50).max(60);
 const percent = z.number().min(0).max(100);
 const nonNegative = z.number().min(0);
+// Índice UV é adimensional; acima de 11 já é "extremo", mas pode passar disso.
+const uvIndex = z.number().min(0).max(25);
 
 /** Exige que todas as séries tenham o mesmo tamanho da série `time` e não estejam vazias. */
 function sameLength(series: Record<string, unknown[]>, ctx: z.RefinementCtx) {
@@ -113,6 +119,7 @@ export const openMeteoResponseSchema = z.object({
     temperature_2m: z.literal("°C"),
     precipitation_probability: z.literal("%"),
     precipitation: z.literal("mm"),
+    wind_speed_10m: z.literal("km/h"),
   }),
   hourly: z
     .object({
@@ -122,6 +129,7 @@ export const openMeteoResponseSchema = z.object({
       precipitation: z.array(nonNegative.nullable()),
       weather_code: z.array(wmoCode.nullable()),
       is_day: z.array(flag.nullable()),
+      wind_speed_10m: z.array(nonNegative.nullable()),
     })
     .superRefine(sameLength),
 
@@ -130,6 +138,9 @@ export const openMeteoResponseSchema = z.object({
     temperature_2m_min: z.literal("°C"),
     precipitation_sum: z.literal("mm"),
     precipitation_probability_max: z.literal("%"),
+    sunrise: z.literal("iso8601"),
+    sunset: z.literal("iso8601"),
+    uv_index_max: z.literal(""),
   }),
   daily: z
     .object({
@@ -139,6 +150,9 @@ export const openMeteoResponseSchema = z.object({
       temperature_2m_min: z.array(temperature.nullable()),
       precipitation_sum: z.array(nonNegative.nullable()),
       precipitation_probability_max: z.array(percent.nullable()),
+      sunrise: z.array(localDateTime.nullable()),
+      sunset: z.array(localDateTime.nullable()),
+      uv_index_max: z.array(uvIndex.nullable()),
     })
     .superRefine(sameLength),
 });

@@ -44,6 +44,8 @@ export type HourlyPoint = {
   precipitationMm: number | null;
   weatherCode: number | null;
   isDay: boolean | null;
+  /** Velocidade média do vento a 10 m, no instante indicado. */
+  windSpeedKmh: number | null;
 };
 
 export type DailyPoint = {
@@ -53,6 +55,11 @@ export type DailyPoint = {
   precipitationSumMm: number | null;
   precipitationProbMaxPct: number | null;
   weatherCode: number | null;
+  /** ISO com offset (ex.: "2026-10-15T05:59-03:00"). */
+  sunrise: string | null;
+  sunset: string | null;
+  /** Índice UV máximo previsto para o dia (adimensional). */
+  uvIndexMax: number | null;
 };
 
 export type WeatherReport = {

@@ -1,21 +1,19 @@
 import { ExternalLink, Siren } from "lucide-react";
+import { Glass } from "@/components/home/Glass";
 import { OFFICIAL_ALERT_SOURCES } from "@/lib/config";
 
 /**
  * Este site NÃO emite, resume nem verifica alertas. Nunca exibir "sem alertas":
  * não temos como garantir isso. Só apontamos para as fontes oficiais.
  */
-export function AlertsBox() {
+export function AlertsBox({ className = "" }: { className?: string }) {
   return (
-    <section
-      aria-labelledby="alertas-oficiais"
-      className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-zinc-200"
-    >
-      <h2 id="alertas-oficiais" className="flex items-center gap-2 text-base font-semibold text-zinc-900">
-        <Siren aria-hidden="true" className="size-5 text-red-600" />
+    <Glass labelledBy="alertas-oficiais" className={className}>
+      <h2 id="alertas-oficiais" className="flex items-center gap-2 text-base font-medium">
+        <Siren aria-hidden="true" className="size-5 text-red-300" />
         Alertas oficiais
       </h2>
-      <p className="mt-2 text-sm text-zinc-700">
+      <p className="mt-2 text-sm text-white">
         Este site <strong>não emite alertas</strong> e não verifica se há alertas ativos para
         Cascavel. Para avisos de tempestade, vendaval, granizo ou chuva forte, consulte:
       </p>
@@ -26,7 +24,7 @@ export function AlertsBox() {
               href={source.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-between gap-3 rounded-lg bg-zinc-50 px-3 py-2.5 text-sm font-medium text-sky-800 ring-1 ring-zinc-200 hover:bg-sky-50"
+              className="flex items-center justify-between gap-3 glass-inner rounded-xl px-3 py-2.5 text-sm font-medium text-white underline-offset-2 ring-1 ring-white/20 hover:underline hover:ring-white/50"
             >
               {source.name}
               <ExternalLink aria-hidden="true" className="size-4 shrink-0" />
@@ -35,6 +33,6 @@ export function AlertsBox() {
           </li>
         ))}
       </ul>
-    </section>
+    </Glass>
   );
 }

@@ -93,6 +93,17 @@ export const EL_NINO = {
     ] satisfies Statement[],
   },
 
+  /**
+   * Números em destaque na página. Cada valor (sem o "> " inicial) precisa
+   * aparecer, igual, num texto da mesma fonte acima (tests/el-nino.test.tsx confere).
+   */
+  highlights: [
+    { value: "El Niño", label: "status oficial do boletim (“El Niño Advisory”)", source: "noaa-cpc" },
+    { value: "+2,1 °C", label: "acima da média no índice Niño-3.4 no último mês", source: "noaa-cpc" },
+    { value: "> 83%", label: "de chance de El Niño forte a muito forte até jan–mar/2027", source: "noaa-cpc" },
+    { value: "95%", label: "probabilidade de intensidade muito forte em out–dez/2026", source: "painel-brasil" },
+  ] satisfies Array<{ value: string; label: string; source: SourceId }>,
+
   south: [
     {
       text: "Para outubro–dezembro de 2026, a previsão indica chuva acima da média no Sul do Brasil, com risco de cheias que deve diminuir até dezembro. O documento ressalta que são tendências sazonais e que os impactos podem variar em cada região.",

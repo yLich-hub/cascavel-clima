@@ -1,9 +1,9 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
+import { HomeDashboard } from "@/components/home/HomeDashboard";
 import { WeatherUnavailable } from "@/components/weather/StatusMessages";
-import { WeatherDashboard } from "@/components/weather/WeatherDashboard";
 import { parseOpenMeteoResponse } from "@/lib/providers/open-meteo";
-import { buildWeatherView, localDate } from "@/lib/weather/freshness";
+import { buildWeatherView } from "@/lib/weather/freshness";
 import { normalizeOpenMeteo } from "@/lib/weather/normalize";
 import type { ServedFrom } from "@/types/weather";
 import fixture from "./fixtures/open-meteo-cascavel.json";
@@ -17,10 +17,10 @@ function render(minutesAfterFetch: number, servedFrom: ServedFrom = "live", muta
   const report = normalizeOpenMeteo(raw, FETCHED_AT);
   const now = new Date(FETCHED_AT.getTime() + minutesAfterFetch * 60_000);
   const view = buildWeatherView({ report, servedFrom }, now);
-  return renderToStaticMarkup(<WeatherDashboard view={view} today={localDate(now)} />);
+  return renderToStaticMarkup(<HomeDashboard view={view} now={now} />);
 }
 
-describe("WeatherDashboard", () => {
+describe("HomeDashboard (estados)", () => {
   it("dado fresco: mostra condições, rótulos e atribuição, sem aviso", () => {
     const html = render(0);
     expect(html).toContain("20°");
@@ -87,5 +87,46 @@ describe("acessibilidade da lista de horas", () => {
   it("a região rolável recebe foco pelo teclado e tem nome acessível", () => {
     const html = render(0);
     expect(html).toMatch(/<div role="region" aria-labelledby="proximas-horas" tabindex="0"/);
+  });
+});
+
+describe("HomeDashboard (widgets do novo visual)", () => {
+  const html = render(0); // 15:20 em Cascavel; fixture: nascer 06:00, pôr 18:39, UV 3,25
+
+  it("resumo em texto feito só com dados", () => {
+    expect(html).toContain("Sensação térmica de");
+    expect(html).toMatch(/Chance de chuva de até \d+% nas próximas 23 horas\./);
+  });
+
+  it("vento: faixa e horário do pico das próximas horas", () => {
+    expect(html).toMatch(/Próximas 23 h: de \d+ km\/h a \d+ km\/h, pico às \d{2}h\./);
+  });
+
+  it("sol: horários do dia e próximo evento", () => {
+    expect(html).toContain("06:00");
+    expect(html).toContain("18:39");
+    expect(html).toContain("Pôr do sol às 18:39.");
+  });
+
+  it("UV: valor arredondado e faixa da OMS", () => {
+    expect(html).toContain("Índice UV máximo hoje");
+    expect(html).toContain("UV máx. hoje: 3 (moderado)");
+  });
+
+  it("curva dos 7 dias com lista em texto para leitores de tela", () => {
+    expect(html).toContain("quarta-feira, 14/10:");
+    expect(html).toMatch(/mínima \d+°,\s*máxima \d+°/);
+  });
+
+  it("todo texto da Início fica dentro de cards de vidro (contraste testado)", () => {
+    // Nenhum texto em cinza escuro do visual antigo, que sumiria sobre a cena.
+    expect(html).not.toMatch(/text-zinc-[5-9]00/);
+  });
+
+  it("sem dado do dia: widgets mostram indisponível em vez de inventar", () => {
+    const expired = render(25 * 60);
+    expect(expired).toContain("Previsão de vento indisponível");
+    expect(expired).toContain("Horários do sol indisponíveis");
+    expect(expired).toContain("Índice UV indisponível");
   });
 });

@@ -14,10 +14,11 @@ type Props = {
   initial: Freshness;
 };
 
-const STYLES: Record<FreshnessStatus, { dot: string; text: string }> = {
-  fresh: { dot: "bg-emerald-500", text: "text-zinc-600" },
-  stale: { dot: "bg-amber-500", text: "text-amber-800" },
-  expired: { dot: "bg-zinc-400", text: "text-zinc-700" },
+// Texto sempre branco sobre o vidro (contraste testado); o status vai no ponto e no texto.
+const DOT: Record<FreshnessStatus, string> = {
+  fresh: "bg-emerald-400",
+  stale: "bg-amber-400",
+  expired: "bg-zinc-300",
 };
 
 const NOTE: Record<FreshnessStatus, string> = {
@@ -36,13 +37,12 @@ export function FreshnessBadge({ kind, prefix, initial }: Props) {
     return () => clearInterval(id);
   }, [initial.referenceTime, kind]);
 
-  const style = STYLES[freshness.status];
   const time =
     freshness.ageMinutes === null ? "horário desconhecido" : formatTime(freshness.referenceTime);
 
   return (
-    <p className={`flex items-start gap-2 text-sm ${style.text}`} data-status={freshness.status}>
-      <span aria-hidden="true" className={`mt-1.5 size-2 shrink-0 rounded-full ${style.dot}`} />
+    <p className="flex items-start gap-2 text-sm text-white/90" data-status={freshness.status}>
+      <span aria-hidden="true" className={`mt-1.5 size-2 shrink-0 rounded-full ${DOT[freshness.status]}`} />
       <span>
         {prefix} {time} ({formatAge(freshness.ageMinutes)}){NOTE[freshness.status]}
       </span>

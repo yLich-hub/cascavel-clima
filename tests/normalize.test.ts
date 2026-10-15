@@ -74,3 +74,32 @@ describe("normalizeOpenMeteo", () => {
     expect(result.daily[2].precipitationSumMm).toBeNull();
   });
 });
+
+describe("campos do novo visual", () => {
+  const report = normalizeOpenMeteo(parsed(), FETCHED_AT);
+
+  it("copia o vento por hora", () => {
+    expect(report.hourly[0].windSpeedKmh).toBe(fixture.hourly.wind_speed_10m[0]);
+    expect(report.hourly.every((point) => "windSpeedKmh" in point)).toBe(true);
+  });
+
+  it("converte nascer e pôr do sol para ISO com offset", () => {
+    expect(report.daily[0].sunrise).toBe(`${fixture.daily.sunrise[0]}-03:00`);
+    expect(report.daily[0].sunset).toBe(`${fixture.daily.sunset[0]}-03:00`);
+    // 06:00 em Cascavel = 09:00 UTC
+    expect(new Date(report.daily[0].sunrise!).toISOString()).toBe("2026-10-14T09:00:00.000Z");
+  });
+
+  it("copia o UV máximo sem arredondar (arredondar é decisão da interface)", () => {
+    expect(report.daily.map((day) => day.uvIndexMax)).toEqual(fixture.daily.uv_index_max);
+  });
+
+  it("preserva ausência de nascer do sol e UV como null", () => {
+    const raw = parsed();
+    raw.daily.sunrise[2] = null;
+    raw.daily.uv_index_max[2] = null;
+    const result = normalizeOpenMeteo(raw, FETCHED_AT);
+    expect(result.daily[2].sunrise).toBeNull();
+    expect(result.daily[2].uvIndexMax).toBeNull();
+  });
+});

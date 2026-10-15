@@ -116,3 +116,23 @@ describe("página 404", () => {
     expect(html).not.toMatch(/could not be found/i);
   });
 });
+
+describe("tema escuro (regressão: texto escuro ilegível na página El Niño)", () => {
+  const files = sourceFiles(join(process.cwd(), "src"));
+
+  it("nenhum componente usa texto escuro, que some sobre o fundo escuro do site", () => {
+    const darkText = /text-(zinc|slate|sky|gray|neutral|stone)-[6-9]00/;
+    expect(files.filter((file) => darkText.test(readFileSync(file, "utf8")))).toEqual([]);
+  });
+
+  it("o tema não depende mais de body:has(...) (vazava da Início para a página seguinte)", () => {
+    const css = readFileSync(join(process.cwd(), "src/app/globals.css"), "utf8");
+    expect(css.replace(/\/\*[\s\S]*?\*\//g, "")).not.toMatch(/body:has\(/);
+  });
+
+  it("Sobre e 404 têm títulos em negrito", async () => {
+    const { default: NotFound } = await import("@/app/not-found");
+    expect(renderToStaticMarkup(<AboutPage />)).toMatch(/<h1 class="[^"]*font-bold/);
+    expect(renderToStaticMarkup(<NotFound />)).toMatch(/<h1 class="[^"]*font-bold/);
+  });
+});

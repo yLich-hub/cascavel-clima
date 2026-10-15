@@ -1,8 +1,9 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f4f4f5; /* zinc-100: cartões brancos se destacam */
-  --foreground: #171717;
+  /* Tema escuro: as páginas desenham cenas/gradientes por cima; texto branco por padrão. */
+  --background: #0f172a; /* slate-900 */
+  --foreground: #ffffff;
 }
 
 @theme inline {
@@ -12,10 +13,271 @@
   --font-mono: var(--font-geist-mono);
 }
 
-/* Modo escuro está fora do escopo da v1 (ver README). */
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+}
+
+/* ---------------------------------------------------------------------------
+ * Cenas do tempo (src/components/scene). Só `transform` e `opacity` são
+ * animados, para a GPU compor sem redesenhar. Quem pede movimento reduzido no
+ * sistema vê a cena parada (regra no fim deste bloco).
+ * ------------------------------------------------------------------------- */
+
+.scene-sun {
+  position: absolute;
+  top: -22cqmin;
+  right: -14cqmin;
+  width: 90cqmin;
+  aspect-ratio: 1;
+  border-radius: 9999px;
+  /* fundo definido em scene-palette.ts (sunGradient) */
+  animation: scene-pulse 9s ease-in-out infinite alternate;
+}
+
+.scene-moon {
+  position: absolute;
+  top: 9%;
+  right: 13%;
+  width: 10cqmin;
+  aspect-ratio: 1;
+  border-radius: 9999px;
+  background: radial-gradient(circle at 36% 34%, #fdfcf5 0%, #e3e5ec 55%, #b9bdca 100%);
+  box-shadow: 0 0 6cqmin 1cqmin rgb(214 224 255 / 0.28);
+}
+
+.scene-star {
+  position: absolute;
+  border-radius: 9999px;
+  background: #fff;
+  animation: scene-twinkle 4s ease-in-out infinite alternate;
+}
+
+.scene-cloud {
+  position: absolute;
+  left: 0;
+  will-change: transform;
+  filter: blur(9px);
+  animation: scene-drift linear infinite;
+}
+
+.scene-cloud > span {
+  position: absolute;
+  border-radius: 9999px;
+  background: radial-gradient(circle at 50% 32%, var(--cloud-light) 0%, var(--cloud) 72%);
+}
+
+.scene-fog {
+  position: absolute;
+  left: -50%;
+  width: 200%;
+  height: 34%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--fog) 18%,
+    transparent 36%,
+    var(--fog) 58%,
+    transparent 76%,
+    var(--fog) 92%,
+    transparent 100%
+  );
+  filter: blur(18px);
+  will-change: transform;
+  animation: scene-fog 48s ease-in-out infinite alternate;
+}
+
+/* Camada de contraste para o texto branco (cores em scene-palette.ts). */
+.scene-veil {
+  position: absolute;
+  inset: 0;
+}
+
+/* Clarão do raio: no máximo 2 clarões em ~0,3 s, a cada 6–15 s
+   (bem abaixo do limite de 3 por segundo da WCAG 2.3.1). */
+.scene-flash {
+  position: absolute;
+  inset: 0;
+  background: rgb(214 226 255);
+  opacity: 0;
+  animation: scene-flash 900ms ease-out forwards;
+}
+
+.scene-bolt {
+  position: absolute;
+  top: 0;
+  height: 62%;
+  width: auto;
+  opacity: 0;
+  filter: drop-shadow(0 0 6px rgb(200 215 255 / 0.9));
+  animation: scene-bolt 420ms ease-out forwards;
+}
+
+@keyframes scene-pulse {
+  from { transform: scale(1); opacity: 0.92; }
+  to { transform: scale(1.06); opacity: 1; }
+}
+
+@keyframes scene-twinkle {
+  from { opacity: 0.25; }
+  to { opacity: 0.95; }
+}
+
+@keyframes scene-drift {
+  from { transform: translateX(-60cqw) scale(var(--scale, 1)); }
+  to { transform: translateX(120cqw) scale(var(--scale, 1)); }
+}
+
+@keyframes scene-fog {
+  from { transform: translateX(-6%); }
+  to { transform: translateX(6%); }
+}
+
+@keyframes scene-flash {
+  0% { opacity: 0; }
+  6% { opacity: 0.32; }
+  14% { opacity: 0; }
+  24% { opacity: 0.2; }
+  32% { opacity: 0; }
+  100% { opacity: 0; }
+}
+
+@keyframes scene-bolt {
+  0% { opacity: 0; }
+  10% { opacity: 1; }
+  40% { opacity: 0.85; }
+  100% { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scene-sun,
+  .scene-star,
+  .scene-cloud,
+  .scene-fog {
+    animation: none !important;
+  }
+  /* Sem animação, as nuvens ficam na posição inicial: distribui pela tela. */
+  .scene-cloud {
+    transform: translateX(var(--rest-x, 0)) scale(var(--scale, 1));
+  }
+}
+
+/* ---------------------------------------------------------------------------
+ * Tema escuro do site todo: cabeçalho e rodapé em vidro escuro com texto
+ * branco, em todas as páginas. (Antes era ativado por `body:has(.home-scene)`,
+ * o que vazava para a página seguinte, porque o Next mantém a Início
+ * escondida na memória ao navegar.) O vidro usa a mesma cor/opacidade de
+ * GLASS (scene-palette.ts); tests/contrast.test.ts confere este valor.
+ * ------------------------------------------------------------------------- */
+.site-header,
+.site-footer {
+  /* Camada própria: sem isso uma cena fixa (que vem depois no HTML) cobre o cabeçalho. */
+  position: relative;
+  z-index: 10;
+  background: rgb(2 6 23 / 0.45);
+  border-color: rgb(255 255 255 / 0.15);
+  color: #fff;
+  -webkit-backdrop-filter: blur(24px);
+  backdrop-filter: blur(24px);
+}
+
+/* ---------------------------------------------------------------------------
+ * Página El Niño: oceano com ondas e "mancha quente" (ilustração), entrada
+ * animada e seções que aparecem ao rolar. Tudo desligado com movimento reduzido.
+ * ------------------------------------------------------------------------- */
+.ocean-wave {
+  position: absolute;
+  left: 0;
+  width: 200%;
+  will-change: transform;
+  animation: ocean-drift linear infinite;
+}
+
+.ocean-warm {
+  position: absolute;
+  top: 34%;
+  right: -12cqw;
+  width: 75cqw;
+  aspect-ratio: 1.6;
+  border-radius: 9999px;
+  will-change: transform, opacity;
+  animation:
+    ocean-warm-in 2.6s cubic-bezier(0.2, 0.7, 0.2, 1) both,
+    ocean-warm-pulse 7s ease-in-out 2.6s infinite alternate;
+}
+
+@keyframes ocean-drift {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+@keyframes ocean-warm-in {
+  from { transform: scale(0.35); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+@keyframes ocean-warm-pulse {
+  from { transform: scale(1); opacity: 1; }
+  to { transform: scale(1.08) translateX(-3cqw); opacity: 0.85; }
+}
+
+/* Entrada da página: conteúdo sobe suavemente e uma faixa quente cruza o topo. */
+.enter-up {
+  animation: enter-up 0.8s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.enter-sweep {
+  position: absolute;
+  inset: 0 auto auto 0;
+  height: 3px;
+  width: 100%;
+  background: linear-gradient(90deg, transparent, rgb(255 160 80), rgb(255 210 140), transparent);
+  transform-origin: left;
+  animation: enter-sweep 1.4s cubic-bezier(0.4, 0, 0.2, 1) 0.2s both;
+}
+
+@keyframes reveal-slide {
+  from { transform: translateY(28px) scale(0.985); }
+  to { transform: none; }
+}
+
+@keyframes enter-up {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes enter-sweep {
+  from { transform: scaleX(0); opacity: 1; }
+  70% { opacity: 1; }
+  to { transform: scaleX(1); opacity: 0.35; }
+}
+
+/* Seções aparecem ao rolar: só em navegadores com animação ligada à rolagem.
+   Sem suporte, ficam visíveis normalmente (nada depende de JavaScript). */
+@supports (animation-timeline: view()) {
+  .reveal {
+    /* Só desliza, sem esmaecer: com opacidade parcial o texto ficava abaixo de
+       4,5:1 enquanto a seção entrava na tela (apontado pelo Lighthouse). */
+    animation: reveal-slide linear both;
+    animation-timeline: view();
+    /* Completa quando a seção termina de entrar: a última da página também fica 100% visível. */
+    animation-range: entry 0% entry 60%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ocean-wave,
+  .ocean-warm,
+  .enter-up,
+  .enter-sweep,
+  .reveal {
+    animation: none !important;
+  }
+}
+
+/* Balões dentro dos cards de vidro: mesma cor/opacidade de INNER (scene-palette.ts, testada). */
+.glass-inner {
+  background: rgb(2 6 23 / 0.25);
 }

@@ -200,3 +200,16 @@ describe("runtimeCacheStore (getCache real, em memória fora da Vercel)", () => 
     expect(await store.get()).toEqual(report);
   });
 });
+
+describe("versão do formato salvo", () => {
+  it("recusa relatório no formato antigo (v1, sem vento por hora nem UV)", () => {
+    const v2 = normalizeOpenMeteo(raw(), new Date());
+    const v1 = {
+      ...v2,
+      hourly: v2.hourly.map(({ windSpeedKmh: _wind, ...rest }) => rest), // eslint-disable-line @typescript-eslint/no-unused-vars
+      daily: v2.daily.map(({ uvIndexMax: _uv, sunrise: _rise, sunset: _set, ...rest }) => rest), // eslint-disable-line @typescript-eslint/no-unused-vars
+    };
+    expect(isWeatherReport(v2)).toBe(true);
+    expect(isWeatherReport(v1)).toBe(false);
+  });
+});

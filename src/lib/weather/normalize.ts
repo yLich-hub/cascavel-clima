@@ -30,7 +30,10 @@ export function normalizeOpenMeteo(raw: OpenMeteoResponse, fetchedAt: Date): Wea
     precipitationMm: hourly.precipitation[i],
     weatherCode: hourly.weather_code[i],
     isDay: toFlag(hourly.is_day[i]),
+    windSpeedKmh: hourly.wind_speed_10m[i],
   }));
+
+  const localWithOffset = (value: string | null) => (value === null ? null : withOffset(value, offset));
 
   const dailyPoints: DailyPoint[] = daily.time.map((date, i) => ({
     date,
@@ -39,6 +42,9 @@ export function normalizeOpenMeteo(raw: OpenMeteoResponse, fetchedAt: Date): Wea
     precipitationSumMm: daily.precipitation_sum[i],
     precipitationProbMaxPct: daily.precipitation_probability_max[i],
     weatherCode: daily.weather_code[i],
+    sunrise: localWithOffset(daily.sunrise[i]),
+    sunset: localWithOffset(daily.sunset[i]),
+    uvIndexMax: daily.uv_index_max[i],
   }));
 
   const modelTime = withOffset(current.time, offset);
