@@ -45,7 +45,9 @@ Navegador ──▶ Next.js (servidor, Vercel) ──▶ cache (10 min) ──�
 Três camadas de proteção contra dado ruim ou velho:
 
 1. **Serviço** (`src/lib/weather/service.ts`): timeout de 8 s, uma retentativa só
-   para erros transitórios, último dado bom em memória como fallback.
+   para erros transitórios. O último dado bom fica no Runtime Cache da Vercel
+   (`last-good-store.ts`, compartilhado entre instâncias, válido por 24 h) e é
+   usado como fallback se o provedor falhar.
 2. **Cache remoto** (`get-weather.ts`, `"use cache: remote"`, Runtime Cache da
    Vercel): no máximo uma chamada ao provedor a cada 10 min, compartilhada entre
    todas as instâncias; falhas nunca entram no cache. O `"use cache"` comum
