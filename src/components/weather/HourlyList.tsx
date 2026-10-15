@@ -22,7 +22,7 @@ export function HourlyList({ hourly }: { hourly: HourlyPoint[] }) {
             role="region"
             aria-labelledby="proximas-horas"
             tabIndex={0}
-            className="-mx-5 mt-3 overflow-x-auto px-5 pb-2 outline-none focus-visible:ring-2 focus-visible:ring-sky-600 focus-visible:ring-inset"
+            className="-mx-5 mt-2 overflow-x-auto px-5 pt-1 pb-2 outline-none focus-visible:ring-2 focus-visible:ring-sky-600 focus-visible:ring-inset"
           >
             <ol className="flex snap-x gap-2">
               {hourly.map((point) => (
