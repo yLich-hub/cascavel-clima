@@ -43,6 +43,19 @@ describe("conteúdo do El Niño", () => {
   });
 });
 
+describe("números em destaque", () => {
+  it("cada número aparece, igual, num texto da mesma fonte (não diverge do conteúdo conferido)", () => {
+    for (const item of EL_NINO.highlights) {
+      const value = item.value.replace(/^>\s*/, "");
+      const sameSource = allStatements.filter((statement) => statement.source === item.source);
+      expect(
+        sameSource.some((statement) => statement.text.includes(value)),
+        `"${item.value}" (${item.source})`,
+      ).toBe(true);
+    }
+  });
+});
+
 describe("isReviewOverdue", () => {
   it("não avisa no dia da revisão nem no dia do próximo boletim", () => {
     expect(isReviewOverdue("2026-10-14")).toBe(false);
@@ -67,9 +80,15 @@ describe("página El Niño", () => {
     expect(html).toContain("não é previsão do tempo");
   });
 
-  it("cita a fonte em cada afirmação", () => {
+  it("cita a fonte em cada afirmação e em cada número em destaque", () => {
     const citations = html.match(/\(Fonte:/g) ?? [];
-    expect(citations).toHaveLength(allStatements.length);
+    expect(citations).toHaveLength(allStatements.length + EL_NINO.highlights.length);
+  });
+
+  it("títulos em negrito e nenhum texto escuro (fundo escuro)", () => {
+    expect(html).toMatch(/<h1 class="[^"]*font-bold/);
+    expect(html.match(/<h2[^>]*font-bold/g)?.length).toBe(5);
+    expect(html).not.toMatch(/text-(zinc|slate|sky)-[6-9]00/);
   });
 
   it("lista todas as fontes com links seguros", () => {

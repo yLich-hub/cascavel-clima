@@ -1,38 +1,40 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Glass } from "@/components/home/Glass";
 
 export const metadata: Metadata = {
   title: "Página não encontrada",
 };
 
+const LINKS = [
+  { href: "/", label: "Ver a previsão do tempo para Cascavel" },
+  { href: "/el-nino", label: "El Niño: contexto climático" },
+  { href: "/sobre", label: "Sobre e fontes" },
+];
+
 /** Usada para qualquer endereço que não existe no site (HTTP 404). */
 export default function NotFound() {
   return (
-    <main className="mx-auto w-full max-w-xl flex-1 px-4 pb-10 pt-10">
-      <p className="text-sm font-medium text-sky-800">Erro 404</p>
-      <h1 className="mt-1 text-2xl font-semibold tracking-tight text-zinc-900">
-        Página não encontrada
-      </h1>
-      <p className="mt-2 text-sm text-zinc-700">
-        O endereço que você acessou não existe ou foi movido.
-      </p>
-      <ul className="mt-5 space-y-2 text-sm">
-        <li>
-          <Link href="/" className="font-medium text-sky-800 underline underline-offset-2">
-            Ver a previsão do tempo para Cascavel
-          </Link>
-        </li>
-        <li>
-          <Link href="/el-nino" className="text-sky-800 underline underline-offset-2">
-            El Niño: contexto climático
-          </Link>
-        </li>
-        <li>
-          <Link href="/sobre" className="text-sky-800 underline underline-offset-2">
-            Sobre e fontes
-          </Link>
-        </li>
-      </ul>
-    </main>
+    <div className="relative isolate flex-1 bg-gradient-to-b from-slate-900 to-slate-800">
+      <main className="mx-auto w-full max-w-xl px-4 pb-12 pt-10">
+        <Glass as="div" className="enter-up p-6 sm:p-8">
+          <p className="text-sm font-medium text-white/90">Erro 404</p>
+          <h1 className="mt-1 text-3xl font-bold tracking-tight">Página não encontrada</h1>
+          <p className="mt-2 text-base">O endereço que você acessou não existe ou foi movido.</p>
+          <ul className="mt-5 space-y-2 text-sm">
+            {LINKS.map((link) => (
+              <li key={link.href}>
+                <Link
+                  href={link.href}
+                  className="glass-inner block rounded-xl px-3 py-2.5 font-medium underline-offset-2 ring-1 ring-white/20 hover:underline hover:ring-white/50"
+                >
+                  {link.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </Glass>
+      </main>
+    </div>
   );
 }

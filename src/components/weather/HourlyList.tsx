@@ -43,7 +43,7 @@ function HourItem({ point }: { point: HourlyPoint }) {
   return (
     // `relative` prende os textos sr-only (position: absolute) dentro da lista rolável;
     // sem isso eles se ancoram no documento e criam rolagem horizontal na página.
-    <li className="relative flex w-16 shrink-0 snap-start flex-col items-center gap-1 rounded-2xl bg-white/10 px-1 py-3 text-center ring-1 ring-white/10">
+    <li className="relative flex w-16 shrink-0 snap-start flex-col items-center gap-1 glass-inner rounded-2xl px-1 py-3 text-center ring-1 ring-white/20">
       <span className="text-sm text-white/90">{formatHour(point.time)}</span>
       <WeatherIcon code={point.weatherCode} isDay={point.isDay} className="size-7 text-white" />
       <span className="sr-only">{label}</span>

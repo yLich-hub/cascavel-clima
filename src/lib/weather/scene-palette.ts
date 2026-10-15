@@ -47,3 +47,32 @@ export const sunGradient = () =>
     [255, 214, 140],
     0.45,
   )} 26%, ${rgb([255, 214, 140], 0.12)} 46%, transparent 66%)`;
+
+/**
+ * Cena de oceano da página El Niño (ilustração, não representa dados).
+ * `warm` é a "mancha quente" no Pacífico: o ponto mais claro da cena.
+ */
+export const OCEAN = {
+  sky: ["#071226", "#0d2a4d"] as [string, string],
+  waves: [
+    [17, 63, 107],
+    [12, 48, 86],
+    [7, 33, 62],
+  ] as RGB[],
+  warm: { color: [255, 138, 66] as RGB, alpha: 0.55 },
+  hot: { color: [255, 196, 120] as RGB, alpha: 0.35 },
+};
+
+export const warmGradient = () =>
+  `radial-gradient(closest-side, ${rgb(OCEAN.hot.color, OCEAN.hot.alpha)} 0%, ${rgb(
+    OCEAN.warm.color,
+    OCEAN.warm.alpha,
+  )} 35%, ${rgb(OCEAN.warm.color, 0.18)} 65%, transparent 100%)`;
+
+/**
+ * "Balões" dentro dos cards (horas, selos, destaques). Escurecem um pouco o
+ * vidro em vez de clarear: com branco por cima, o texto caía abaixo de 4,5:1
+ * nas cenas claras. O destaque visual vem da borda/faixa colorida.
+ * Classe CSS correspondente: `.glass-inner` (globals.css, valor testado).
+ */
+export const INNER = { color: [2, 6, 23] as RGB, alpha: 0.25 };

@@ -18,7 +18,7 @@ export function Hero({ view, today, className = "" }: Props) {
     <Glass className={`flex flex-col gap-5 p-6 sm:p-8 ${className}`} labelledBy="agora">
       <h2 id="agora" className="text-sm font-medium tracking-wide text-white/90">
         {LOCATION.name} – {LOCATION.state} · agora{" "}
-        <span className="whitespace-nowrap">(estimativa de modelo, não medição)</span>
+        <span>(estimativa de modelo, não medição)</span>
       </h2>
 
       {current === null ? (
@@ -62,11 +62,11 @@ export function Hero({ view, today, className = "" }: Props) {
       )}
 
       <div className="flex flex-wrap items-center gap-2 text-sm">
-        <span className="rounded-full bg-white/10 px-3 py-1 ring-1 ring-white/20">
+        <span className="glass-inner rounded-full px-3 py-1 ring-1 ring-white/25">
           {LOCATION.name} – {LOCATION.state}
         </span>
         {uv && (
-          <span className="rounded-full bg-white/10 px-3 py-1 ring-1 ring-white/20">
+          <span className="glass-inner rounded-full px-3 py-1 ring-1 ring-white/25">
             UV máx. hoje: {uv.value} ({uv.level})
           </span>
         )}

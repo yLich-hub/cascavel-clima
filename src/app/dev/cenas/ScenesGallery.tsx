@@ -84,17 +84,17 @@ export function ScenesGallery() {
 
   return (
     <main className="mx-auto w-full max-w-6xl flex-1 px-4 pb-10 pt-6">
-      <h1 className="text-xl font-semibold text-zinc-900">Cenas do tempo (somente desenvolvimento)</h1>
+      <h1 className="text-xl font-semibold text-white">Cenas do tempo (somente desenvolvimento)</h1>
       <p
         id="diagnostico"
         data-reduced={diag.reduced}
         data-cloud-animation={diag.cloudAnimation}
-        className="mt-1 text-sm text-zinc-700"
+        className="mt-1 text-sm text-white/90"
       >
         Movimento reduzido: <strong>{diag.reduced ? "sim" : "não"}</strong> · animação das nuvens:{" "}
         <strong>{diag.cloudAnimation}</strong> · quadros por segundo: <strong>{diag.fps}</strong>
       </p>
-      <p id="raios" data-flashes={flashes.join(",")} className="text-sm text-zinc-700">
+      <p id="raios" data-flashes={flashes.join(",")} className="text-sm text-white/90">
         Raios na cena grande: <strong>{flashes.length}</strong>
         {flashes.length > 1 &&
           ` · intervalos (s): ${flashes

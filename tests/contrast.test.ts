@@ -4,6 +4,8 @@ import {
   CLOUD_TONES,
   FOG,
   GLASS,
+  INNER,
+  OCEAN,
   SUN_PEAK,
   TEXT_SECONDARY_ALPHA,
   VEIL,
@@ -48,12 +50,18 @@ describe("contraste do texto branco sobre os cards de vidro (pior caso de cada c
       const scene = sceneFor(code, isDay);
       it(`${scene.id} (código ${code}, ${isDay ? "dia" : "noite"}) ≥ ${WCAG_AA_TEXT}:1`, () => {
         for (const [where, point] of brightestPoints(scene)) {
-          const background = cardBackground(point, scene);
-          const secondary = blend(WHITE, TEXT_SECONDARY_ALPHA, background);
-          expect(contrastRatio(WHITE, background), `texto branco sobre ${where}`).toBeGreaterThanOrEqual(WCAG_AA_TEXT);
-          expect(contrastRatio(secondary, background), `texto secundário sobre ${where}`).toBeGreaterThanOrEqual(
-            WCAG_AA_TEXT,
-          );
+          for (const [layer, background] of [
+            ["card", cardBackground(point, scene)],
+            ["balão dentro do card", blend(INNER.color, INNER.alpha, cardBackground(point, scene))],
+          ] as const) {
+            const secondary = blend(WHITE, TEXT_SECONDARY_ALPHA, background);
+            expect(contrastRatio(WHITE, background), `texto branco, ${layer}, sobre ${where}`).toBeGreaterThanOrEqual(
+              WCAG_AA_TEXT,
+            );
+            expect(contrastRatio(secondary, background), `texto secundário, ${layer}, sobre ${where}`).toBeGreaterThanOrEqual(
+              WCAG_AA_TEXT,
+            );
+          }
         }
       });
     }
@@ -70,11 +78,42 @@ describe("contrastRatio", () => {
   });
 });
 
-describe("vidro do cabeçalho/rodapé na Início (globals.css)", () => {
+describe("vidro do cabeçalho/rodapé (globals.css)", () => {
   it("usa a mesma cor e opacidade de GLASS testada acima", async () => {
     const { readFileSync } = await import("node:fs");
-    const css = readFileSync("src/app/globals.css", "utf8");
-    const block = css.slice(css.indexOf("body:has(.home-scene) .site-header,"));
+    const css = readFileSync("src/app/globals.css", "utf8").replace(/\r\n/g, "\n");
+    const start = css.indexOf(".site-header,\n.site-footer {");
+    expect(start).toBeGreaterThanOrEqual(0);
+    const block = css.slice(start, css.indexOf("}", start));
     expect(block).toContain(`background: rgb(${GLASS.color.join(" ")} / ${GLASS.alpha});`);
+  });
+});
+
+describe("contraste na cena de oceano (página El Niño)", () => {
+  const weakestVeil = Math.min(...VEIL.map((v) => v.alpha));
+  const points: Array<[string, RGB]> = [
+    ["céu", hex(OCEAN.sky[1])],
+    ...OCEAN.waves.map((wave, i): [string, RGB] => [`onda ${i + 1}`, wave]),
+    // Mancha quente sobre a onda mais clara: o ponto mais claro da cena.
+    ["mancha quente", blend(OCEAN.hot.color, OCEAN.hot.alpha, blend(OCEAN.warm.color, OCEAN.warm.alpha, OCEAN.waves[0]))],
+  ];
+  it.each(points)("texto branco legível sobre %s (card e balão) ≥ 4,5:1", (_where, point) => {
+    const card = blend(GLASS.color, GLASS.alpha, blend(BLACK, weakestVeil, point));
+    for (const background of [card, blend(INNER.color, INNER.alpha, card)]) {
+      expect(contrastRatio(WHITE, background)).toBeGreaterThanOrEqual(WCAG_AA_TEXT);
+      expect(contrastRatio(blend(WHITE, TEXT_SECONDARY_ALPHA, background), background)).toBeGreaterThanOrEqual(WCAG_AA_TEXT);
+    }
+  });
+});
+
+describe("balões dentro dos cards (globals.css)", () => {
+  it("a classe .glass-inner usa a mesma cor e opacidade de INNER testada acima", async () => {
+    const { readFileSync } = await import("node:fs");
+    const css = readFileSync("src/app/globals.css", "utf8").replace(/\r\n/g, "\n");
+    const start = css.indexOf(".glass-inner {");
+    expect(start).toBeGreaterThanOrEqual(0);
+    expect(css.slice(start, css.indexOf("}", start))).toContain(
+      `background: rgb(${INNER.color.join(" ")} / ${INNER.alpha});`,
+    );
   });
 });

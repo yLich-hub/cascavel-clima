@@ -13,9 +13,8 @@ import { sceneFor } from "@/lib/weather/scenes";
 
 export default function Home() {
   return (
-    // `home-scene`: ativa o cabeçalho/rodapé de vidro (globals.css). Fundo escuro
-    // neutro enquanto a cena (que depende dos dados) não chega: nada de clarão branco.
-    <div className="home-scene relative isolate flex-1 bg-gradient-to-b from-slate-800 to-slate-700">
+    // Fundo escuro neutro enquanto a cena (que depende dos dados) não chega: nada de clarão branco.
+    <div className="relative isolate flex-1 bg-gradient-to-b from-slate-800 to-slate-700">
       <main className="mx-auto w-full max-w-6xl px-4 pb-10 pt-6 lg:pt-10">
         <h1 className="sr-only">
           Previsão do tempo em {LOCATION.name} – {LOCATION.state}

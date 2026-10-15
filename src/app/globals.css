@@ -1,8 +1,9 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f4f4f5; /* zinc-100: cartões brancos se destacam */
-  --foreground: #171717;
+  /* Tema escuro: as páginas desenham cenas/gradientes por cima; texto branco por padrão. */
+  --background: #0f172a; /* slate-900 */
+  --foreground: #ffffff;
 }
 
 @theme inline {
@@ -12,7 +13,6 @@
   --font-mono: var(--font-geist-mono);
 }
 
-/* Modo escuro está fora do escopo da v1 (ver README). */
 
 body {
   background: var(--background);
@@ -165,17 +165,15 @@ body {
 }
 
 /* ---------------------------------------------------------------------------
- * Início com cena de fundo: cabeçalho e rodapé viram vidro escuro com texto
- * branco. O vidro usa a mesma cor/opacidade de GLASS (scene-palette.ts);
- * tests/contrast.test.ts confere que o valor abaixo continua igual.
+ * Tema escuro do site todo: cabeçalho e rodapé em vidro escuro com texto
+ * branco, em todas as páginas. (Antes era ativado por `body:has(.home-scene)`,
+ * o que vazava para a página seguinte, porque o Next mantém a Início
+ * escondida na memória ao navegar.) O vidro usa a mesma cor/opacidade de
+ * GLASS (scene-palette.ts); tests/contrast.test.ts confere este valor.
  * ------------------------------------------------------------------------- */
-body:has(.home-scene) {
-  background: #1f2733;
-}
-
-body:has(.home-scene) .site-header,
-body:has(.home-scene) .site-footer {
-  /* Camada própria: sem isso a cena fixa (que vem depois no HTML) cobre o cabeçalho. */
+.site-header,
+.site-footer {
+  /* Camada própria: sem isso uma cena fixa (que vem depois no HTML) cobre o cabeçalho. */
   position: relative;
   z-index: 10;
   background: rgb(2 6 23 / 0.45);
@@ -185,14 +183,101 @@ body:has(.home-scene) .site-footer {
   backdrop-filter: blur(24px);
 }
 
-body:has(.home-scene) .site-header a,
-body:has(.home-scene) .site-header svg,
-body:has(.home-scene) .site-footer,
-body:has(.home-scene) .site-footer div,
-body:has(.home-scene) .site-footer a {
-  color: #fff;
+/* ---------------------------------------------------------------------------
+ * Página El Niño: oceano com ondas e "mancha quente" (ilustração), entrada
+ * animada e seções que aparecem ao rolar. Tudo desligado com movimento reduzido.
+ * ------------------------------------------------------------------------- */
+.ocean-wave {
+  position: absolute;
+  left: 0;
+  width: 200%;
+  will-change: transform;
+  animation: ocean-drift linear infinite;
 }
 
-body:has(.home-scene) .site-nav {
-  max-width: 72rem;
+.ocean-warm {
+  position: absolute;
+  top: 34%;
+  right: -12cqw;
+  width: 75cqw;
+  aspect-ratio: 1.6;
+  border-radius: 9999px;
+  will-change: transform, opacity;
+  animation:
+    ocean-warm-in 2.6s cubic-bezier(0.2, 0.7, 0.2, 1) both,
+    ocean-warm-pulse 7s ease-in-out 2.6s infinite alternate;
+}
+
+@keyframes ocean-drift {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+@keyframes ocean-warm-in {
+  from { transform: scale(0.35); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+@keyframes ocean-warm-pulse {
+  from { transform: scale(1); opacity: 1; }
+  to { transform: scale(1.08) translateX(-3cqw); opacity: 0.85; }
+}
+
+/* Entrada da página: conteúdo sobe suavemente e uma faixa quente cruza o topo. */
+.enter-up {
+  animation: enter-up 0.8s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.enter-sweep {
+  position: absolute;
+  inset: 0 auto auto 0;
+  height: 3px;
+  width: 100%;
+  background: linear-gradient(90deg, transparent, rgb(255 160 80), rgb(255 210 140), transparent);
+  transform-origin: left;
+  animation: enter-sweep 1.4s cubic-bezier(0.4, 0, 0.2, 1) 0.2s both;
+}
+
+@keyframes reveal-slide {
+  from { transform: translateY(28px) scale(0.985); }
+  to { transform: none; }
+}
+
+@keyframes enter-up {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes enter-sweep {
+  from { transform: scaleX(0); opacity: 1; }
+  70% { opacity: 1; }
+  to { transform: scaleX(1); opacity: 0.35; }
+}
+
+/* Seções aparecem ao rolar: só em navegadores com animação ligada à rolagem.
+   Sem suporte, ficam visíveis normalmente (nada depende de JavaScript). */
+@supports (animation-timeline: view()) {
+  .reveal {
+    /* Só desliza, sem esmaecer: com opacidade parcial o texto ficava abaixo de
+       4,5:1 enquanto a seção entrava na tela (apontado pelo Lighthouse). */
+    animation: reveal-slide linear both;
+    animation-timeline: view();
+    /* Completa quando a seção termina de entrar: a última da página também fica 100% visível. */
+    animation-range: entry 0% entry 60%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ocean-wave,
+  .ocean-warm,
+  .enter-up,
+  .enter-sweep,
+  .reveal {
+    animation: none !important;
+  }
+}
+
+/* Balões dentro dos cards de vidro: mesma cor/opacidade de INNER (scene-palette.ts, testada). */
+.glass-inner {
+  background: rgb(2 6 23 / 0.25);
 }

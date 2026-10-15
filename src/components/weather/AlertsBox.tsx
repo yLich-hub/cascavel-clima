@@ -24,7 +24,7 @@ export function AlertsBox({ className = "" }: { className?: string }) {
               href={source.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-between gap-3 rounded-xl bg-white/10 px-3 py-2.5 text-sm font-medium text-white underline-offset-2 ring-1 ring-white/15 hover:bg-white/20 hover:underline"
+              className="flex items-center justify-between gap-3 glass-inner rounded-xl px-3 py-2.5 text-sm font-medium text-white underline-offset-2 ring-1 ring-white/20 hover:underline hover:ring-white/50"
             >
               {source.name}
               <ExternalLink aria-hidden="true" className="size-4 shrink-0" />
