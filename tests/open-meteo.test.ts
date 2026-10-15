@@ -174,3 +174,45 @@ describe("fetchOpenMeteo", () => {
     expect(error.retryable).toBe(true);
   });
 });
+
+describe("campos do novo visual (vento por hora, sol, UV)", () => {
+  it("pede vento por hora, nascer/pôr do sol e UV máximo", () => {
+    const url = new URL(buildOpenMeteoUrl());
+    expect(url.searchParams.get("hourly")).toContain("wind_speed_10m");
+    const daily = url.searchParams.get("daily")!.split(",");
+    expect(daily).toEqual(expect.arrayContaining(["sunrise", "sunset", "uv_index_max"]));
+  });
+
+  it("rejeita vento por hora em outra unidade", () => {
+    const json = sample();
+    json.hourly_units.wind_speed_10m = "m/s";
+    expectInvalid(json);
+  });
+
+  it("rejeita UV com unidade inesperada ou valor impossível", () => {
+    const withUnit = sample();
+    withUnit.daily_units.uv_index_max = "%";
+    expectInvalid(withUnit);
+
+    const tooHigh = sample();
+    tooHigh.daily.uv_index_max[0] = 40;
+    expectInvalid(tooHigh);
+  });
+
+  it("rejeita nascer do sol em formato inesperado", () => {
+    const json = sample();
+    json.daily.sunrise[0] = "06:00";
+    expectInvalid(json);
+  });
+
+  it("aceita null em nascer/pôr do sol e UV (provedor sem o dado)", () => {
+    const json = sample();
+    json.daily.sunrise[1] = null;
+    json.daily.uv_index_max[1] = null;
+    json.hourly.wind_speed_10m[2] = null;
+    const parsed = parseOpenMeteoResponse(json);
+    expect(parsed.daily.sunrise[1]).toBeNull();
+    expect(parsed.daily.uv_index_max[1]).toBeNull();
+    expect(parsed.hourly.wind_speed_10m[2]).toBeNull();
+  });
+});

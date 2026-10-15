@@ -16,7 +16,8 @@ export type LastGoodStore = {
 };
 
 /** Mude ao alterar o formato de WeatherReport: dados antigos passam a ser ignorados. */
-export const REPORT_SCHEMA_VERSION = 1;
+// v2 (D1 do novo visual): vento por hora, nascer/pôr do sol e UV máximo.
+export const REPORT_SCHEMA_VERSION = 2;
 
 const KEY = `weather-last-good-v${REPORT_SCHEMA_VERSION}`;
 // Mais velho que isso a previsão já não é exibida (freshness.ts), então não vale guardar.
@@ -34,7 +35,10 @@ export function isWeatherReport(value: unknown): value is WeatherReport {
     typeof report.current?.temperatureC === "number" &&
     typeof report.location?.name === "string" &&
     Array.isArray(report.hourly) &&
-    Array.isArray(report.daily)
+    Array.isArray(report.daily) &&
+    // Campos da v2: um dado da v1 que escapasse da troca de chave ainda é recusado.
+    report.hourly.every((point) => "windSpeedKmh" in point) &&
+    report.daily.every((day) => "uvIndexMax" in day && "sunrise" in day && "sunset" in day)
   );
 }
 
