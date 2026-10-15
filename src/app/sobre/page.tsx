@@ -153,6 +153,13 @@ export default function AboutPage() {
             <Item>
               Escala do Índice UV: <A href={WHO_UV_GUIDE}>OMS, Global Solar UV Index: a practical guide</A>.
             </Item>
+            <Item>
+              Visual inspirado em{" "}
+              <A href="https://dribbble.com/shots/25898869-Weather-Forecasting-Web-Design">
+                Weather &amp; Forecasting Web Design
+              </A>
+              , do Gapsy Studio. As ilustrações deste site são próprias, desenhadas em código.
+            </Item>
             {OFFICIAL_ALERT_SOURCES.map((source) => (
               <Item key={source.url}>
                 <A href={source.url}>{source.name}</A>
