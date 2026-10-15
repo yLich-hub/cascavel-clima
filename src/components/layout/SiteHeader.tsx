@@ -3,10 +3,10 @@ import Link from "next/link";
 
 export function SiteHeader() {
   return (
-    <header className="border-b border-zinc-200 bg-white">
+    <header className="site-header border-b border-zinc-200 bg-white">
       <nav
         aria-label="Principal"
-        className="mx-auto flex w-full max-w-xl items-center justify-between px-4 py-3"
+        className="site-nav mx-auto flex w-full max-w-xl items-center justify-between px-4 py-3"
       >
         <Link href="/" className="flex items-center gap-2 font-semibold text-zinc-900">
           <CloudSun aria-hidden="true" className="size-5 text-sky-600" />

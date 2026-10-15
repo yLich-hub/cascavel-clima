@@ -2,6 +2,7 @@ import type { CSSProperties } from "react";
 import { Lightning } from "@/components/scene/Lightning";
 import { Precipitation } from "@/components/scene/Precipitation";
 import { seededRandom } from "@/components/scene/random";
+import { CLOUD_TONES, FOG, VEIL_BRIGHT_ALPHA, rgb, sunGradient, veilGradient } from "@/lib/weather/scene-palette";
 import type { CloudTone, Scene } from "@/lib/weather/scenes";
 
 /**
@@ -23,23 +24,18 @@ export function WeatherScene({ scene }: { scene: Scene }) {
       style={{ background: `linear-gradient(180deg, ${top} 0%, ${bottom} 100%)`, containerType: "size" }}
     >
       {scene.stars && <Stars />}
-      {scene.sun && <div className="scene-sun" />}
+      {scene.sun && <div className="scene-sun" style={{ background: sunGradient() }} />}
       {scene.moon && <div className="scene-moon" />}
       {scene.fog && <Fog />}
       <Clouds count={scene.clouds.count} tone={scene.clouds.tone} fast={scene.lightning} />
       {scene.rain > 0 && <Precipitation kind="rain" intensity={scene.rain} />}
       {scene.snow > 0 && <Precipitation kind="snow" intensity={scene.snow} />}
       {scene.lightning && <Lightning />}
-      <div className="scene-veil" />
+      <div className="scene-veil" style={{ background: veilGradient() }} />
+      {scene.bright && <div className="scene-veil" style={{ background: rgb([0, 0, 0], VEIL_BRIGHT_ALPHA) }} />}
     </div>
   );
 }
-
-const TONES: Record<CloudTone, { cloud: string; light: string; opacity: number }> = {
-  white: { cloud: "rgb(236 241 247)", light: "rgb(255 255 255)", opacity: 0.85 },
-  gray: { cloud: "rgb(150 160 175)", light: "rgb(200 208 219)", opacity: 0.8 },
-  dark: { cloud: "rgb(58 66 80)", light: "rgb(104 114 130)", opacity: 0.92 },
-};
 
 /**
  * Formato de uma nuvem: "bolhas" sobrepostas e uma base achatada, relativas à
@@ -57,7 +53,7 @@ const PUFFS = [
 function Clouds({ count, tone, fast }: { count: number; tone: CloudTone; fast: boolean }) {
   if (count === 0) return null;
   const random = seededRandom(7 + count);
-  const colors = TONES[tone];
+  const colors = CLOUD_TONES[tone];
 
   return (
     <>
@@ -73,8 +69,8 @@ function Clouds({ count, tone, fast }: { count: number; tone: CloudTone; fast: b
           animationDelay: `${-random() * duration}s`,
           "--scale": (0.75 + random() * 0.85).toFixed(2),
           "--rest-x": `${(i / count) * 100 - 10}cqw`,
-          "--cloud": colors.cloud,
-          "--cloud-light": colors.light,
+          "--cloud": rgb(colors.cloud),
+          "--cloud-light": rgb(colors.light),
         } as CSSProperties;
         return (
           <div key={i} className="scene-cloud" style={style}>
@@ -127,7 +123,7 @@ function Fog() {
             {
               top: `${top}%`,
               animationDelay: `${-i * 12}s`,
-              "--fog": "rgb(225 230 236 / 0.55)",
+              "--fog": rgb(FOG.color, FOG.alpha),
             } as CSSProperties
           }
         />

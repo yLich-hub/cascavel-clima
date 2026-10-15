@@ -1,42 +1,44 @@
 import Link from "next/link";
 import { connection } from "next/server";
 import { Suspense } from "react";
+import { Glass } from "@/components/home/Glass";
+import { HomeDashboard } from "@/components/home/HomeDashboard";
+import { WeatherScene } from "@/components/scene/WeatherScene";
 import { AlertsBox } from "@/components/weather/AlertsBox";
 import { WeatherUnavailable, WeatherSkeleton } from "@/components/weather/StatusMessages";
-import { WeatherDashboard } from "@/components/weather/WeatherDashboard";
 import { LOCATION } from "@/lib/config";
-import { buildWeatherView, localDate } from "@/lib/weather/freshness";
+import { buildWeatherView } from "@/lib/weather/freshness";
 import { getWeather } from "@/lib/weather/get-weather";
+import { sceneFor } from "@/lib/weather/scenes";
 
 export default function Home() {
   return (
-    <main className="mx-auto w-full max-w-xl flex-1 px-4 pb-10 pt-6">
-      <header className="mb-5">
-        <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">
-          {LOCATION.name} – {LOCATION.state}
+    // `home-scene`: ativa o cabeçalho/rodapé de vidro (globals.css). Fundo escuro
+    // neutro enquanto a cena (que depende dos dados) não chega: nada de clarão branco.
+    <div className="home-scene relative isolate flex-1 bg-gradient-to-b from-slate-800 to-slate-700">
+      <main className="mx-auto w-full max-w-6xl px-4 pb-10 pt-6 lg:pt-10">
+        <h1 className="sr-only">
+          Previsão do tempo em {LOCATION.name} – {LOCATION.state}
         </h1>
-        <p className="text-sm text-zinc-600">Previsão do tempo</p>
-      </header>
 
-      <Suspense fallback={<WeatherSkeleton />}>
-        <Weather />
-      </Suspense>
+        <Suspense fallback={<WeatherSkeleton />}>
+          <Weather />
+        </Suspense>
 
-      {/* Fora do Suspense: estático, aparece mesmo se a previsão falhar. */}
-      <div className="mt-4">
-        <AlertsBox />
-      </div>
-
-      <Link
-        href="/el-nino"
-        className="mt-4 block rounded-2xl bg-white p-5 shadow-sm ring-1 ring-zinc-200 hover:bg-sky-50"
-      >
-        <span className="text-base font-semibold text-zinc-900">El Niño: contexto climático →</span>
-        <span className="mt-1 block text-sm text-zinc-600">
-          O que é, a situação atual segundo as fontes oficiais e o que se espera para o Paraná.
-        </span>
-      </Link>
-    </main>
+        {/* Fora do Suspense: estático, aparece mesmo se a previsão falhar. */}
+        <div className="mt-4 grid gap-4 lg:grid-cols-2">
+          <AlertsBox />
+          <Glass as="div" className="flex flex-col justify-center">
+            <Link href="/el-nino" className="group block">
+              <span className="text-base font-medium group-hover:underline">El Niño: contexto climático →</span>
+              <span className="mt-1 block text-sm text-white/90">
+                O que é, a situação atual segundo as fontes oficiais e o que se espera para o Paraná.
+              </span>
+            </Link>
+          </Glass>
+        </div>
+      </main>
+    </div>
   );
 }
 
@@ -49,9 +51,29 @@ async function Weather() {
     result = await getWeather();
   } catch (error) {
     console.error("[home] previsão indisponível", error);
-    return <WeatherUnavailable />;
+    return (
+      <>
+        <SceneBackdrop code={null} isDay={null} />
+        <WeatherUnavailable />
+      </>
+    );
   }
 
   const now = new Date();
-  return <WeatherDashboard view={buildWeatherView(result, now)} today={localDate(now)} />;
+  const view = buildWeatherView(result, now);
+  return (
+    <>
+      {/* Sem dado atual (expirado), a cena fica neutra: não sugere uma condição que não sabemos. */}
+      <SceneBackdrop code={view.current?.weatherCode ?? null} isDay={view.current?.isDay ?? null} />
+      <HomeDashboard view={view} now={now} />
+    </>
+  );
+}
+
+function SceneBackdrop({ code, isDay }: { code: number | null; isDay: boolean | null }) {
+  return (
+    <div className="fixed inset-0 -z-10">
+      <WeatherScene scene={sceneFor(code, isDay)} />
+    </div>
+  );
 }

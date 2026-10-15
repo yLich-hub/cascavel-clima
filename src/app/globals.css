@@ -33,14 +33,7 @@ body {
   width: 90cqmin;
   aspect-ratio: 1;
   border-radius: 9999px;
-  background: radial-gradient(
-    circle,
-    rgb(255 251 235 / 1) 0%,
-    rgb(255 236 179 / 0.85) 10%,
-    rgb(255 214 140 / 0.45) 26%,
-    rgb(255 214 140 / 0.12) 46%,
-    transparent 66%
-  );
+  /* fundo definido em scene-palette.ts (sunGradient) */
   animation: scene-pulse 9s ease-in-out infinite alternate;
 }
 
@@ -96,17 +89,10 @@ body {
   animation: scene-fog 48s ease-in-out infinite alternate;
 }
 
-/* Camada de contraste para o texto branco sobre qualquer cena. */
+/* Camada de contraste para o texto branco (cores em scene-palette.ts). */
 .scene-veil {
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    180deg,
-    rgb(0 0 0 / 0.28) 0%,
-    rgb(0 0 0 / 0.08) 38%,
-    rgb(0 0 0 / 0.12) 62%,
-    rgb(0 0 0 / 0.42) 100%
-  );
 }
 
 /* Clarão do raio: no máximo 2 clarões em ~0,3 s, a cada 6–15 s
@@ -176,4 +162,37 @@ body {
   .scene-cloud {
     transform: translateX(var(--rest-x, 0)) scale(var(--scale, 1));
   }
+}
+
+/* ---------------------------------------------------------------------------
+ * Início com cena de fundo: cabeçalho e rodapé viram vidro escuro com texto
+ * branco. O vidro usa a mesma cor/opacidade de GLASS (scene-palette.ts);
+ * tests/contrast.test.ts confere que o valor abaixo continua igual.
+ * ------------------------------------------------------------------------- */
+body:has(.home-scene) {
+  background: #1f2733;
+}
+
+body:has(.home-scene) .site-header,
+body:has(.home-scene) .site-footer {
+  /* Camada própria: sem isso a cena fixa (que vem depois no HTML) cobre o cabeçalho. */
+  position: relative;
+  z-index: 10;
+  background: rgb(2 6 23 / 0.45);
+  border-color: rgb(255 255 255 / 0.15);
+  color: #fff;
+  -webkit-backdrop-filter: blur(24px);
+  backdrop-filter: blur(24px);
+}
+
+body:has(.home-scene) .site-header a,
+body:has(.home-scene) .site-header svg,
+body:has(.home-scene) .site-footer,
+body:has(.home-scene) .site-footer div,
+body:has(.home-scene) .site-footer a {
+  color: #fff;
+}
+
+body:has(.home-scene) .site-nav {
+  max-width: 72rem;
 }

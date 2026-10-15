@@ -1,4 +1,7 @@
+import type { CloudTone } from "@/lib/weather/scene-palette";
 import { describeWeatherCode } from "@/lib/weather/wmo-codes";
+
+export type { CloudTone };
 
 /**
  * Cena de fundo para a condição atual. Lógica pura (testada em tests/scenes.test.ts):
@@ -21,8 +24,6 @@ export type SceneId =
 /** 0 = nenhuma, 1 = fraca, 2 = moderada, 3 = forte. */
 export type Intensity = 0 | 1 | 2 | 3;
 
-export type CloudTone = "white" | "gray" | "dark";
-
 export type Scene = {
   id: SceneId;
   isNight: boolean;
@@ -36,6 +37,8 @@ export type Scene = {
   rain: Intensity;
   snow: Intensity;
   lightning: boolean;
+  /** Cena clara: recebe véu extra para o texto branco continuar legível. */
+  bright: boolean;
 };
 
 const DAY_SKY: Record<SceneId, [string, string]> = {
@@ -122,17 +125,22 @@ export function sceneFor(code: number | null, isDay: boolean | null): Scene {
     rain: 0,
     snow: 0,
     lightning: false,
+    bright: false,
   };
+
+  // Céu claro de dia (sol, nuvens brancas, névoa, neve) precisa de mais véu para o texto.
+  // Neve conta como clara também à noite: os flocos são brancos.
+  const bright = (!isNight && ["clear", "partly-cloudy", "cloudy", "fog"].includes(id)) || id === "snow";
 
   switch (id) {
     case "clear":
-      return { ...scene, sun: !isNight, moon: isNight, stars: isNight, clouds: { count: code === 1 ? 1 : 0, tone: "white" } };
+      return { ...scene, bright, sun: !isNight, moon: isNight, stars: isNight, clouds: { count: code === 1 ? 1 : 0, tone: isNight ? "gray" : "white" } };
     case "partly-cloudy":
-      return { ...scene, sun: !isNight, moon: isNight, stars: isNight, clouds: { count: 3, tone: isNight ? "gray" : "white" } };
+      return { ...scene, bright, sun: !isNight, moon: isNight, stars: isNight, clouds: { count: 3, tone: isNight ? "gray" : "white" } };
     case "cloudy":
-      return { ...scene, clouds: { count: 6, tone: "gray" } };
+      return { ...scene, bright, clouds: { count: 6, tone: "gray" } };
     case "fog":
-      return { ...scene, fog: true, clouds: { count: 2, tone: "gray" } };
+      return { ...scene, bright, fog: true, clouds: { count: 2, tone: "gray" } };
     case "drizzle":
       return { ...scene, clouds: { count: 5, tone: "gray" }, rain: Math.max(1, level) as Intensity };
     case "rain":
@@ -141,7 +149,7 @@ export function sceneFor(code: number | null, isDay: boolean | null): Scene {
     case "storm":
       return { ...scene, clouds: { count: 7, tone: "dark" }, rain: 3, lightning: true };
     case "snow":
-      return { ...scene, clouds: { count: 5, tone: "gray" }, snow: Math.max(1, level) as Intensity };
+      return { ...scene, bright, clouds: { count: 5, tone: "gray" }, snow: Math.max(1, level) as Intensity };
     case "unavailable":
       return scene;
   }
