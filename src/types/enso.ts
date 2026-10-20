@@ -1,4 +1,4 @@
-import type { Freshness, ServedFrom } from "@/types/weather";
+import type { Freshness, ProviderFailure, ServedFrom } from "@/types/weather";
 
 /**
  * Dados do El Niño (ENOS) vindos do NOAA Climate Prediction Center.
@@ -61,7 +61,7 @@ export type DiscussionReport = { discussion: EnsoDiscussion; meta: Meta };
  * - "expired": há dado, mas velho demais para exibir (ENSO_FRESHNESS_DAYS).
  */
 export type EnsoPart<T> =
-  | { available: true; report: T; servedFrom: ServedFrom; freshness: Freshness }
+  | { available: true; report: T; servedFrom: ServedFrom; failure?: ProviderFailure; freshness: Freshness }
   | { available: false; reason: "unavailable" }
   | { available: false; reason: "expired"; freshness: Freshness };
 

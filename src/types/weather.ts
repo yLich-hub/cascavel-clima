@@ -73,9 +73,24 @@ export type WeatherReport = {
 /** "live": buscado agora; "fallback": provedor falhou e usamos o último dado bom. */
 export type ServedFrom = "live" | "fallback";
 
+/**
+ * Por que o provedor falhou na última tentativa (só com servedFrom "fallback").
+ * Vai para /api/weather e /api/enso para o monitor dizer o motivo sem abrir os logs.
+ */
+export type ProviderFailure = {
+  kind: "timeout" | "network" | "http" | "invalid-response";
+  /** Código HTTP, quando houver (ex.: 429 = limite de uso do provedor). */
+  status?: number;
+  /** Mensagem curta do erro (sem dados sensíveis: não há chaves neste projeto). */
+  message: string;
+  /** Quando a tentativa falhou (ISO). */
+  at: string;
+};
+
 export type WeatherResult = {
   report: WeatherReport;
   servedFrom: ServedFrom;
+  failure?: ProviderFailure;
 };
 
 export type FreshnessStatus = "fresh" | "stale" | "expired";
@@ -95,6 +110,8 @@ export type Freshness = {
 export type WeatherView = {
   location: Location;
   servedFrom: ServedFrom;
+  /** Só quando servedFrom é "fallback": motivo da falha da última busca. */
+  failure?: ProviderFailure;
   freshness: { current: Freshness; forecast: Freshness };
   current: CurrentConditions | null;
   /** Próximas 24 h (cards de horas, vento e resumo). */

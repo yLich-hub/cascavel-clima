@@ -40,10 +40,10 @@ function part<T>(
   now: Date,
 ): EnsoPart<T> {
   if (settled.status === "rejected") return { available: false, reason: "unavailable" };
-  const { report, servedFrom } = settled.value;
+  const { report, servedFrom, failure } = settled.value;
   const freshness = classifyAge(reference(report), now, toMinutes(rule));
   if (freshness.status === "expired") return { available: false, reason: "expired", freshness };
-  return { available: true, report, servedFrom, freshness };
+  return { available: true, report, servedFrom, ...(failure && { failure }), freshness };
 }
 
 /**

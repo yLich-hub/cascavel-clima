@@ -102,7 +102,11 @@ describe("createEnsoServices", () => {
       stores: { discussion: memoryStore(discussionReport) },
     });
     const result = await services.discussion.load();
-    expect(result).toEqual({ report: discussionReport, servedFrom: "fallback" });
+    expect(result).toEqual({
+      report: discussionReport,
+      servedFrom: "fallback",
+      failure: { kind: "invalid-response", message: "situação desconhecida", at: "2026-10-20T03:00:00.000Z" },
+    });
   });
 
   it("sem dado anterior: erro explícito, nunca dado inventado", async () => {

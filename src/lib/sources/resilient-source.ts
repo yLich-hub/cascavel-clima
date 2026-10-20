@@ -2,9 +2,10 @@ import "server-only";
 import { PROVIDER_MAX_RETRIES } from "@/lib/config";
 import { ProviderError } from "@/lib/providers/http";
 import type { LastGoodStore } from "@/lib/sources/last-good-store";
+import type { ProviderFailure } from "@/types/weather";
 
 export type ServedFrom = "live" | "fallback";
-export type Loaded<T> = { report: T; servedFrom: ServedFrom };
+export type Loaded<T> = { report: T; servedFrom: ServedFrom; failure?: ProviderFailure };
 
 export type ResilientSourceDeps<Raw, T> = {
   /** Prefixo dos logs, ex.: "weather". */
@@ -98,7 +99,15 @@ export function createResilientSource<Raw, T>({
         const providerError = toProviderError(error);
         log(`[${name}] provedor falhou (${providerError.kind}): ${providerError.message}`);
         const fallback = newest(lastGood, await readStore());
-        if (fallback) return { report: fallback, servedFrom: "fallback" };
+        if (fallback) {
+          const failure: ProviderFailure = {
+            kind: providerError.kind,
+            ...(providerError.status !== undefined && { status: providerError.status }),
+            message: providerError.message.slice(0, 200),
+            at: now().toISOString(),
+          };
+          return { report: fallback, servedFrom: "fallback", failure };
+        }
         throw unavailable(providerError);
       }
     },
