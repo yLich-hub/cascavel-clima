@@ -1,3 +1,4 @@
+import type { Twilight } from "@/lib/weather/insights";
 import type { CloudTone } from "@/lib/weather/scene-palette";
 import { describeWeatherCode } from "@/lib/weather/wmo-codes";
 
@@ -24,12 +25,18 @@ export type SceneId =
 /** 0 = nenhuma, 1 = fraca, 2 = moderada, 3 = forte. */
 export type Intensity = 0 | 1 | 2 | 3;
 
+/** Momento do dia que a cena representa. "dawn"/"dusk": até 40 min do nascer/pôr do sol. */
+export type ScenePhase = "day" | "night" | "dawn" | "dusk";
+
 export type Scene = {
   id: SceneId;
   isNight: boolean;
+  phase: ScenePhase;
   /** Gradiente do céu: [topo, base]. */
   sky: [string, string];
   sun: boolean;
+  /** Sol baixo e alaranjado, perto do horizonte (amanhecer/entardecer de dia). */
+  lowSun: boolean;
   moon: boolean;
   stars: boolean;
   clouds: { count: number; tone: CloudTone };
@@ -64,6 +71,17 @@ const NIGHT_SKY: Record<SceneId, [string, string]> = {
   snow: ["#232a36", "#4b5462"],
   unavailable: ["#2a2f38", "#4b525e"],
 };
+
+/**
+ * Céu de amanhecer/entardecer: só para céu limpo, poucas ou muitas nuvens.
+ * Com chuva, névoa ou neve, o céu continua o da condição (é o que se vê).
+ * Antes do nascer e depois do pôr, o horizonte já tem cor, mas o topo é noite.
+ */
+const TWILIGHT_SKY: Record<Twilight, { day: [string, string]; night: [string, string] }> = {
+  dawn: { day: ["#4b6aa8", "#e8a07a"], night: ["#141c3d", "#7a5a78"] },
+  dusk: { day: ["#3c4f8f", "#dd8456"], night: ["#111733", "#6e4a66"] },
+};
+const TWILIGHT_SCENES: SceneId[] = ["clear", "partly-cloudy", "cloudy"];
 
 /** Intensidade de precipitação a partir do código WMO (tabela em wmo-codes.ts). */
 const PRECIPITATION: Record<number, Intensity> = {
@@ -104,20 +122,27 @@ function baseScene(code: number | null): SceneId {
 }
 
 /**
- * @param code  código WMO da condição atual; null = sem dado utilizável
- * @param isDay null (desconhecido) é tratado como dia
+ * @param code     código WMO da condição atual; null = sem dado utilizável
+ * @param isDay    null (desconhecido) é tratado como dia
+ * @param twilight amanhecer/entardecer (twilightAt); null = fora dessas janelas
  */
-export function sceneFor(code: number | null, isDay: boolean | null): Scene {
+export function sceneFor(code: number | null, isDay: boolean | null, twilight: Twilight | null = null): Scene {
   const id = baseScene(code);
   const isNight = isDay === false;
   const level: Intensity = code !== null ? (PRECIPITATION[code] ?? 0) : 0;
-  const sky = (isNight ? NIGHT_SKY : DAY_SKY)[id];
+  const tinted = twilight !== null && TWILIGHT_SCENES.includes(id);
+  const sky = tinted
+    ? TWILIGHT_SKY[twilight][isNight ? "night" : "day"]
+    : (isNight ? NIGHT_SKY : DAY_SKY)[id];
+  const phase: ScenePhase = tinted ? twilight : isNight ? "night" : "day";
 
   const scene: Scene = {
     id,
     isNight,
+    phase,
     sky,
     sun: false,
+    lowSun: false,
     moon: false,
     stars: false,
     clouds: { count: 0, tone: "white" },
@@ -130,13 +155,18 @@ export function sceneFor(code: number | null, isDay: boolean | null): Scene {
 
   // Céu claro de dia (sol, nuvens brancas, névoa, neve) precisa de mais véu para o texto.
   // Neve conta como clara também à noite: os flocos são brancos.
-  const bright = (!isNight && ["clear", "partly-cloudy", "cloudy", "fog"].includes(id)) || id === "snow";
+  const bright = (!isNight && ["clear", "partly-cloudy", "cloudy", "fog"].includes(id)) || id === "snow" || tinted;
+  // No amanhecer/entardecer, o sol fica baixo (de dia); antes do nascer e depois do pôr,
+  // as estrelas aparecem no céu ainda colorido, mas a lua (desenho de noite alta) não.
+  const sunny = !isNight && !tinted;
+  const lowSun = !isNight && tinted && id !== "cloudy";
+  const night = isNight && !tinted;
 
   switch (id) {
     case "clear":
-      return { ...scene, bright, sun: !isNight, moon: isNight, stars: isNight, clouds: { count: code === 1 ? 1 : 0, tone: isNight ? "gray" : "white" } };
+      return { ...scene, bright, sun: sunny, lowSun, moon: night, stars: isNight, clouds: { count: code === 1 ? 1 : 0, tone: isNight || tinted ? "gray" : "white" } };
     case "partly-cloudy":
-      return { ...scene, bright, sun: !isNight, moon: isNight, stars: isNight, clouds: { count: 3, tone: isNight ? "gray" : "white" } };
+      return { ...scene, bright, sun: sunny, lowSun, moon: night, stars: isNight, clouds: { count: 3, tone: isNight || tinted ? "gray" : "white" } };
     case "cloudy":
       return { ...scene, bright, clouds: { count: 6, tone: "gray" } };
     case "fog":

@@ -1,6 +1,9 @@
 import { renderToStaticMarkup } from "react-dom/server";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import ElNinoPage from "@/app/el-nino/page";
+
+// A página tem atualização automática (useRouter); fora do Next, um roteador falso.
+vi.mock("next/navigation", () => ({ useRouter: () => ({ refresh: () => {} }) }));
 import { EL_NINO, SOURCES, isReviewOverdue } from "@/content/el-nino";
 import { formatDate } from "@/lib/format";
 

@@ -2,7 +2,7 @@ import type { CSSProperties } from "react";
 import { Lightning } from "@/components/scene/Lightning";
 import { Precipitation } from "@/components/scene/Precipitation";
 import { seededRandom } from "@/components/scene/random";
-import { CLOUD_TONES, FOG, VEIL_BRIGHT_ALPHA, rgb, sunGradient, veilGradient } from "@/lib/weather/scene-palette";
+import { CLOUD_TONES, FOG, VEIL_BRIGHT_ALPHA, lowSunGradient, rgb, sunGradient, veilGradient } from "@/lib/weather/scene-palette";
 import type { CloudTone, Scene } from "@/lib/weather/scenes";
 
 /**
@@ -18,6 +18,7 @@ export function WeatherScene({ scene }: { scene: Scene }) {
       aria-hidden="true"
       data-scene={scene.id}
       data-night={scene.isNight || undefined}
+      data-phase={scene.phase}
       className="absolute inset-0 overflow-hidden"
       // `container-type: size`: sol, lua e nuvens medem a própria cena (cqmin/cqw),
       // então ela funciona em tela cheia ou dentro de um card pequeno.
@@ -25,6 +26,7 @@ export function WeatherScene({ scene }: { scene: Scene }) {
     >
       {scene.stars && <Stars />}
       {scene.sun && <div className="scene-sun" style={{ background: sunGradient() }} />}
+      {scene.lowSun && <div className="scene-sun scene-sun-low" style={{ background: lowSunGradient() }} />}
       {scene.moon && <div className="scene-moon" />}
       {scene.fog && <Fog />}
       <Clouds count={scene.clouds.count} tone={scene.clouds.tone} fast={scene.lightning} />

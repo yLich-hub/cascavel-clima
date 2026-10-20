@@ -18,6 +18,9 @@ export const CLOUD_TONES: Record<CloudTone, { cloud: RGB; light: RGB; opacity: n
   dark: { cloud: [58, 66, 80], light: [104, 114, 130], opacity: 0.92 },
 };
 
+/** Sol baixo do amanhecer/entardecer: mais alaranjado e menos claro que o do meio do dia. */
+export const LOW_SUN_PEAK: RGB = [255, 214, 160];
+
 export const FOG: { color: RGB; alpha: number } = { color: [225, 230, 236], alpha: 0.55 };
 
 /** Véu escuro em gradiente sobre toda cena (topo → base). */
@@ -62,6 +65,12 @@ export const OCEAN = {
   warm: { color: [255, 138, 66] as RGB, alpha: 0.55 },
   hot: { color: [255, 196, 120] as RGB, alpha: 0.35 },
 };
+
+export const lowSunGradient = () =>
+  `radial-gradient(circle, ${rgb(LOW_SUN_PEAK)} 0%, ${rgb([255, 170, 110], 0.8)} 14%, ${rgb(
+    [255, 140, 90],
+    0.35,
+  )} 32%, ${rgb([255, 120, 80], 0.1)} 50%, transparent 68%)`;
 
 export const warmGradient = () =>
   `radial-gradient(closest-side, ${rgb(OCEAN.hot.color, OCEAN.hot.alpha)} 0%, ${rgb(

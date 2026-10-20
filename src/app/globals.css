@@ -37,6 +37,27 @@ body {
   animation: scene-pulse 9s ease-in-out infinite alternate;
 }
 
+/* Amanhecer/entardecer: sol baixo perto do horizonte; nasce à esquerda (leste) e se põe à direita. */
+.scene-sun-low {
+  top: 38cqh;
+  width: 70cqmin;
+}
+
+[data-phase="dawn"] .scene-sun-low {
+  right: auto;
+  left: -16cqmin;
+}
+
+/* Troca de cena (SceneStage): a antiga some por cima da nova. */
+.scene-layer-out {
+  animation: scene-layer-out 1.4s ease-in-out forwards;
+}
+
+@keyframes scene-layer-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
 .scene-moon {
   position: absolute;
   top: 9%;
@@ -157,6 +178,11 @@ body {
   .scene-cloud,
   .scene-fog {
     animation: none !important;
+  }
+  /* Sem transição: a cena antiga some na hora. */
+  .scene-layer-out {
+    animation: none !important;
+    opacity: 0;
   }
   /* Sem animação, as nuvens ficam na posição inicial: distribui pela tela. */
   .scene-cloud {

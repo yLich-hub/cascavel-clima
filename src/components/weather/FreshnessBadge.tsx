@@ -29,6 +29,12 @@ const NOTE: Record<FreshnessStatus, string> = {
 
 export function FreshnessBadge({ kind, prefix, initial }: Props) {
   const [freshness, setFreshness] = useState(initial);
+  // Dado novo do servidor (atualização automática): recomeça a partir dele.
+  const [shownReference, setShownReference] = useState(initial.referenceTime);
+  if (initial.referenceTime !== shownReference) {
+    setShownReference(initial.referenceTime);
+    setFreshness(initial);
+  }
 
   useEffect(() => {
     const update = () =>

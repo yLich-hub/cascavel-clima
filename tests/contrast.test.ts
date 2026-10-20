@@ -5,6 +5,7 @@ import {
   FOG,
   GLASS,
   INNER,
+  LOW_SUN_PEAK,
   OCEAN,
   SUN_PEAK,
   TEXT_SECONDARY_ALPHA,
@@ -28,6 +29,7 @@ function brightestPoints(scene: Scene): Array<[string, RGB]> {
     ["céu (base)", bottom],
   ];
   if (scene.sun) points.push(["centro do sol", SUN_PEAK]);
+  if (scene.lowSun) points.push(["centro do sol baixo", LOW_SUN_PEAK]);
   if (scene.clouds.count > 0) points.push(["nuvem (parte clara)", CLOUD_TONES[scene.clouds.tone].light]);
   if (scene.fog) points.push(["névoa", blend(FOG.color, FOG.alpha, bottom)]);
   if (scene.snow > 0) points.push(["floco de neve", WHITE]);
@@ -45,25 +47,27 @@ function cardBackground(point: RGB, scene: Scene): RGB {
 const CODES = [null, 0, 1, 2, 3, 45, 48, 51, 53, 55, 61, 63, 65, 66, 71, 73, 75, 80, 81, 82, 95, 96, 97, 99];
 
 describe("contraste do texto branco sobre os cards de vidro (pior caso de cada cena)", () => {
-  for (const isDay of [true, false]) {
-    for (const code of CODES) {
-      const scene = sceneFor(code, isDay);
-      it(`${scene.id} (código ${code}, ${isDay ? "dia" : "noite"}) ≥ ${WCAG_AA_TEXT}:1`, () => {
-        for (const [where, point] of brightestPoints(scene)) {
-          for (const [layer, background] of [
-            ["card", cardBackground(point, scene)],
-            ["balão dentro do card", blend(INNER.color, INNER.alpha, cardBackground(point, scene))],
-          ] as const) {
-            const secondary = blend(WHITE, TEXT_SECONDARY_ALPHA, background);
-            expect(contrastRatio(WHITE, background), `texto branco, ${layer}, sobre ${where}`).toBeGreaterThanOrEqual(
-              WCAG_AA_TEXT,
-            );
-            expect(contrastRatio(secondary, background), `texto secundário, ${layer}, sobre ${where}`).toBeGreaterThanOrEqual(
-              WCAG_AA_TEXT,
-            );
+  for (const twilight of [null, "dawn", "dusk"] as const) {
+    for (const isDay of [true, false]) {
+      for (const code of CODES) {
+        const scene = sceneFor(code, isDay, twilight);
+        it(`${scene.id} (código ${code}, ${isDay ? "dia" : "noite"}, ${scene.phase}) ≥ ${WCAG_AA_TEXT}:1`, () => {
+          for (const [where, point] of brightestPoints(scene)) {
+            for (const [layer, background] of [
+              ["card", cardBackground(point, scene)],
+              ["balão dentro do card", blend(INNER.color, INNER.alpha, cardBackground(point, scene))],
+            ] as const) {
+              const secondary = blend(WHITE, TEXT_SECONDARY_ALPHA, background);
+              expect(contrastRatio(WHITE, background), `texto branco, ${layer}, sobre ${where}`).toBeGreaterThanOrEqual(
+                WCAG_AA_TEXT,
+              );
+              expect(contrastRatio(secondary, background), `texto secundário, ${layer}, sobre ${where}`).toBeGreaterThanOrEqual(
+                WCAG_AA_TEXT,
+              );
+            }
           }
-        }
-      });
+        });
+      }
     }
   }
 });

@@ -18,6 +18,7 @@ import { BulletinNotice } from "@/components/enso/BulletinNotice";
 import { EnsoLive, LiveOceanWarm } from "@/components/enso/EnsoLive";
 import { EnsoLiveSkeleton, LIVE_SECTION } from "@/components/enso/EnsoLivePanel";
 import { Glass } from "@/components/home/Glass";
+import { AutoRefresh } from "@/components/layout/AutoRefresh";
 import { OceanScene, OceanWarm } from "@/components/scene/OceanScene";
 import { EL_NINO, SOURCES, isReviewOverdue, type SourceId, type Statement } from "@/content/el-nino";
 import { compareBulletin } from "@/lib/enso/bulletin";
@@ -52,6 +53,8 @@ export default function ElNinoPage() {
         />
       </div>
 
+      {/* Dados do NOAA mudam devagar (cache de 6 h); com a aba aberta, confere a cada 30 min. */}
+      <AutoRefresh everyMs={30 * 60 * 1000} />
       <main className="mx-auto w-full max-w-4xl space-y-5 px-4 pb-12 pt-8 lg:pt-12">
         <Glass as="div" className="enter-up relative overflow-hidden p-6 sm:p-8">
           <span aria-hidden="true" className="enter-sweep" />

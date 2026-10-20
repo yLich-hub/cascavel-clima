@@ -1,11 +1,13 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { SceneStage } from "@/components/scene/SceneStage";
 import { WeatherScene } from "@/components/scene/WeatherScene";
 import { sceneFor } from "@/lib/weather/scenes";
+import type { Twilight } from "@/lib/weather/insights";
 import { describeWeatherCode } from "@/lib/weather/wmo-codes";
 
-const SAMPLES: Array<{ code: number | null; isDay: boolean }> = [
+const SAMPLES: Array<{ code: number | null; isDay: boolean; twilight?: Twilight }> = [
   { code: 0, isDay: true },
   { code: 0, isDay: false },
   { code: 1, isDay: true },
@@ -21,10 +23,16 @@ const SAMPLES: Array<{ code: number | null; isDay: boolean }> = [
   { code: 97, isDay: false },
   { code: 73, isDay: true },
   { code: null, isDay: true },
+  { code: 0, isDay: true, twilight: "dawn" },
+  { code: 0, isDay: false, twilight: "dawn" },
+  { code: 2, isDay: true, twilight: "dusk" },
+  { code: 0, isDay: false, twilight: "dusk" },
+  { code: 3, isDay: true, twilight: "dusk" },
 ];
 
-const label = (code: number | null, isDay: boolean) =>
-  `${code === null ? "Sem dado recente" : describeWeatherCode(code).label} · ${isDay ? "dia" : "noite"}${code === null ? "" : ` · código ${code}`}`;
+const TWILIGHT_LABEL: Record<Twilight, string> = { dawn: "amanhecer", dusk: "entardecer" };
+const label = (code: number | null, isDay: boolean, twilight?: Twilight) =>
+  `${code === null ? "Sem dado recente" : describeWeatherCode(code).label} · ${isDay ? "dia" : "noite"}${twilight ? ` · ${TWILIGHT_LABEL[twilight]}` : ""}${code === null ? "" : ` · código ${code}`}`;
 
 /** Ferramenta de desenvolvimento: todas as cenas lado a lado + diagnóstico de movimento. */
 export function ScenesGallery() {
@@ -104,9 +112,10 @@ export function ScenesGallery() {
       </p>
 
       <div ref={previewRef} className="relative mt-4 h-[65vh] overflow-hidden rounded-2xl">
-        <WeatherScene key={selected} scene={sceneFor(current.code, current.isDay)} />
+        {/* Mesmo componente da Início: trocar de cena aqui mostra a transição suave. */}
+        <SceneStage className="absolute inset-0" scene={sceneFor(current.code, current.isDay, current.twilight)} />
         <p className="absolute bottom-4 left-4 text-lg font-medium text-white drop-shadow">
-          {label(current.code, current.isDay)}
+          {label(current.code, current.isDay, current.twilight)}
         </p>
       </div>
 
@@ -119,9 +128,9 @@ export function ScenesGallery() {
               aria-pressed={i === selected}
               className="relative block h-28 w-full overflow-hidden rounded-xl text-left ring-sky-600 aria-pressed:ring-4"
             >
-              <WeatherScene scene={sceneFor(sample.code, sample.isDay)} />
+              <WeatherScene scene={sceneFor(sample.code, sample.isDay, sample.twilight)} />
               <span className="absolute inset-x-2 bottom-2 text-xs font-medium text-white drop-shadow">
-                {label(sample.code, sample.isDay)}
+                {label(sample.code, sample.isDay, sample.twilight)}
               </span>
             </button>
           </li>
