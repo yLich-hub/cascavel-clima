@@ -38,6 +38,28 @@ export function sunProgress(now: Date, sunrise: string | null, sunset: string | 
   return { state: "day", fraction: (t - rise) / (set - rise) };
 }
 
+export type Twilight = "dawn" | "dusk";
+
+/** Minutos antes e depois do nascer/pôr do sol em que a cena fica com cores de amanhecer/entardecer. */
+export const TWILIGHT_WINDOW_MIN = 40;
+
+/**
+ * Amanhecer ou entardecer agora? Usa os horários de nascer e pôr do sol do
+ * dia (Open-Meteo). Só muda as cores da cena; não diz nada sobre o tempo.
+ */
+export function twilightAt(now: Date, sunrise: string | null, sunset: string | null): Twilight | null {
+  if (!sunrise || !sunset) return null;
+  const window = TWILIGHT_WINDOW_MIN * 60_000;
+  const t = now.getTime();
+  const near = (iso: string) => {
+    const at = Date.parse(iso);
+    return !Number.isNaN(at) && Math.abs(t - at) <= window;
+  };
+  if (near(sunrise)) return "dawn";
+  if (near(sunset)) return "dusk";
+  return null;
+}
+
 /** Frase da Início feita só com os dados (sem adjetivos de risco). */
 export function describeNow(current: CurrentConditions, hourly: HourlyPoint[]): string {
   const wind = windCardinal(current.windDirectionDeg);

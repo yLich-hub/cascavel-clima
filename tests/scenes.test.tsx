@@ -131,3 +131,43 @@ describe("seededRandom", () => {
     expect(values.every((v) => v >= 0 && v < 1)).toBe(true);
   });
 });
+
+describe("amanhecer e entardecer", () => {
+  it("céu limpo, poucas ou muitas nuvens ganham as cores do amanhecer/entardecer", () => {
+    for (const code of [0, 2, 3]) {
+      expect(sceneFor(code, true, "dawn").phase).toBe("dawn");
+      expect(sceneFor(code, true, "dusk").phase).toBe("dusk");
+      expect(sceneFor(code, true, "dusk").sky).not.toEqual(sceneFor(code, true).sky);
+    }
+    expect(sceneFor(0, true, "dawn").sky).not.toEqual(sceneFor(0, true, "dusk").sky);
+  });
+
+  it("chuva, névoa, neve e trovoada mantêm o céu da condição", () => {
+    for (const code of [45, 61, 73, 95]) {
+      const scene = sceneFor(code, true, "dusk");
+      expect(scene.phase).toBe("day");
+      expect(scene.sky).toEqual(sceneFor(code, true).sky);
+    }
+  });
+
+  it("de dia, sol baixo no lugar do sol alto; sem lua nem estrelas", () => {
+    expect(sceneFor(0, true, "dusk")).toMatchObject({ sun: false, lowSun: true, moon: false, stars: false, bright: true });
+    // Muitas nuvens: céu colorido, mas sem sol à vista.
+    expect(sceneFor(3, true, "dusk")).toMatchObject({ lowSun: false, sun: false });
+  });
+
+  it("antes do nascer/depois do pôr (noite): horizonte colorido e estrelas, sem sol nem lua", () => {
+    expect(sceneFor(0, false, "dawn")).toMatchObject({ phase: "dawn", sun: false, lowSun: false, moon: false, stars: true });
+  });
+
+  it("fora das janelas, nada muda", () => {
+    expect(sceneFor(0, true, null)).toEqual(sceneFor(0, true));
+    expect(sceneFor(0, false).phase).toBe("night");
+  });
+
+  it("a cena desenha o sol baixo e marca o momento do dia", () => {
+    const html = renderToStaticMarkup(<WeatherScene scene={sceneFor(0, true, "dawn")} />);
+    expect(html).toContain("scene-sun-low");
+    expect(html).toContain('data-phase="dawn"');
+  });
+});

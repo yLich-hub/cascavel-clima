@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { scaleY, smoothPath } from "@/lib/svg";
-import { describeNow, sunProgress, uvCategory, windRange } from "@/lib/weather/insights";
+import { describeNow, sunProgress, twilightAt, uvCategory, windRange } from "@/lib/weather/insights";
 import type { CurrentConditions, HourlyPoint } from "@/types/weather";
 
 describe("uvCategory (faixas da OMS)", () => {
@@ -118,5 +118,26 @@ describe("smoothPath e scaleY", () => {
     expect(scaleY(30, 10, 30, 0, 100)).toBe(0);
     expect(scaleY(10, 10, 30, 0, 100)).toBe(100);
     expect(scaleY(20, 20, 20, 0, 100)).toBe(50);
+  });
+});
+
+describe("twilightAt", () => {
+  const rise = "2026-10-15T05:59-03:00";
+  const set = "2026-10-15T18:39-03:00";
+  const at = (local: string) => new Date(`2026-10-15T${local}-03:00`);
+
+  it("até 40 min antes ou depois do nascer: amanhecer; do pôr: entardecer", () => {
+    expect(twilightAt(at("05:19"), rise, set)).toBe("dawn");
+    expect(twilightAt(at("06:39"), rise, set)).toBe("dawn");
+    expect(twilightAt(at("17:59"), rise, set)).toBe("dusk");
+    expect(twilightAt(at("19:19"), rise, set)).toBe("dusk");
+  });
+
+  it("fora das janelas ou sem horários: nada", () => {
+    expect(twilightAt(at("05:18"), rise, set)).toBeNull();
+    expect(twilightAt(at("12:00"), rise, set)).toBeNull();
+    expect(twilightAt(at("19:20"), rise, set)).toBeNull();
+    expect(twilightAt(at("06:00"), null, set)).toBeNull();
+    expect(twilightAt(at("06:00"), "inválido", set)).toBeNull();
   });
 });
