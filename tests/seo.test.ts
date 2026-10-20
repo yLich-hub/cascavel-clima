@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { siteMetadata as metadata } from "@/lib/site-metadata";
 import robots from "@/app/robots";
@@ -23,8 +23,11 @@ describe("compartilhamento e buscadores", () => {
 });
 
 describe("região das funções", () => {
-  it("roda em São Paulo (gru1), perto dos visitantes", () => {
-    expect(JSON.parse(readFileSync("vercel.json", "utf8")).regions).toEqual(["gru1"]);
+  // Em 20/10/2026, com as funções fixadas em São Paulo (gru1), as buscas ao Open-Meteo
+  // passaram a falhar e o site ficou servindo o último dado bom. Volta para a padrão.
+  it("sem região fixa: usa a padrão da Vercel", () => {
+    const config = existsSync("vercel.json") ? JSON.parse(readFileSync("vercel.json", "utf8")) : {};
+    expect(config.regions).toBeUndefined();
   });
 });
 

@@ -45,7 +45,7 @@ export function localDate(now: Date, timeZone: string = LOCATION.timezone): stri
  * - previsão: referência é quando buscamos (`fetchedAt`);
  * - expirado → removido; horas já encerradas e dias anteriores → removidos.
  */
-export function buildWeatherView({ report, servedFrom }: WeatherResult, now: Date): WeatherView {
+export function buildWeatherView({ report, servedFrom, failure }: WeatherResult, now: Date): WeatherView {
   const current = classifyAge(report.meta.modelTime, now, FRESHNESS.current);
   const forecast = classifyAge(report.meta.fetchedAt, now, FRESHNESS.forecast);
   const forecastUsable = forecast.status !== "expired";
@@ -57,6 +57,7 @@ export function buildWeatherView({ report, servedFrom }: WeatherResult, now: Dat
   return {
     location: report.location,
     servedFrom,
+    ...(failure && { failure }),
     freshness: { current, forecast },
     current: current.status === "expired" ? null : report.current,
     hourly: ahead.slice(0, HOURS_AHEAD),

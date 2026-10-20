@@ -120,3 +120,13 @@ describe("buildWeatherView", () => {
     expect(view.servedFrom).toBe("fallback");
   });
 });
+
+describe("motivo da falha na visão", () => {
+  it("vai para a visão só quando o dado veio do fallback", () => {
+    const report = normalizeOpenMeteo(parseOpenMeteoResponse(structuredClone(fixture)), new Date("2026-10-14T18:20:00Z"));
+    const failure = { kind: "http" as const, status: 429, message: "HTTP 429", at: "2026-10-14T19:00:00.000Z" };
+    const now = new Date("2026-10-14T19:00:00Z");
+    expect(buildWeatherView({ report, servedFrom: "fallback", failure }, now).failure).toEqual(failure);
+    expect(buildWeatherView({ report, servedFrom: "live" }, now)).not.toHaveProperty("failure");
+  });
+});

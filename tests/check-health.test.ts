@@ -100,3 +100,41 @@ describe("evaluateHealth – El Niño (/api/enso)", () => {
     expect(evaluateHealth({ pages: okPages, apiStatus: 200, api: api("fresh", "fresh") }).problems).toEqual([]);
   });
 });
+
+describe("motivo da falha no monitor", () => {
+  it("aviso de fallback diz o motivo vindo da API", () => {
+    const body = { ...api("fresh", "fresh", "fallback"), failure: { kind: "http", status: 429, message: "HTTP 429", at: "2026-10-20T19:53:10.000Z" } };
+    const { warnings } = evaluateHealth({ pages: okPages, apiStatus: 200, api: body });
+    expect(warnings[0]).toBe(
+      "Servindo o último dado bom: o Open-Meteo falhou na última tentativa (HTTP 429: limite de uso do provedor, às 19:53 UTC)",
+    );
+  });
+
+  it("sem motivo na API (versão antiga), o aviso continua como antes", () => {
+    const { warnings } = evaluateHealth({ pages: okPages, apiStatus: 200, api: api("fresh", "fresh", "fallback") });
+    expect(warnings[0]).toBe("Servindo o último dado bom: o Open-Meteo falhou na última tentativa");
+  });
+
+  it("El Niño também mostra o motivo", () => {
+    const now = new Date("2026-10-20T12:00:00Z");
+    const part = {
+      available: true,
+      servedFrom: "fallback",
+      failure: { kind: "timeout", message: "sem resposta em 8000 ms", at: "2026-10-20T11:00:00.000Z" },
+      freshness: { status: "fresh" },
+      report: { meta: { fetchedAt: "2026-10-20T09:00:00Z" } },
+    };
+    const ok = { ...part, servedFrom: "live", failure: undefined };
+    const { warnings } = evaluateHealth({
+      pages: okPages,
+      apiStatus: 200,
+      api: api("fresh", "fresh"),
+      ensoStatus: 200,
+      enso: { weekly: part, roni: ok, discussion: ok },
+      now,
+    });
+    expect(warnings[0]).toBe(
+      "El Niño – temperatura semanal: servindo o último dado bom (a última busca ao NOAA falhou; sem resposta no tempo limite, às 11:00 UTC)",
+    );
+  });
+});

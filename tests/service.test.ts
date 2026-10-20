@@ -107,6 +107,14 @@ describe("weather service", () => {
     expect(logs.some((line) => line.includes("provedor falhou (http)"))).toBe(true);
   });
 
+  it("fallback diz o motivo da falha (para /api/weather e o monitor); dado ao vivo não", async () => {
+    const { service, advance } = setup([raw(), http(429), http(429)]);
+    expect((await service.load()).failure).toBeUndefined();
+    advance(15);
+    const result = await service.load();
+    expect(result.failure).toEqual({ kind: "http", status: 429, message: "HTTP 429", at: "2026-10-14T18:35:00.000Z" });
+  });
+
   it("volta a servir dado ao vivo quando o provedor se recupera", async () => {
     const { service, advance } = setup([raw(), invalid(), raw()]);
     await service.load();

@@ -50,10 +50,29 @@ export function evaluateHealth({ pages, apiStatus, api, ensoStatus, enso, now = 
     warnings.push("Condições atuais com mais de 30 min");
   }
   if (api.servedFrom === "fallback") {
-    warnings.push("Servindo o último dado bom: o Open-Meteo falhou na última tentativa");
+    warnings.push(`Servindo o último dado bom: o Open-Meteo falhou na última tentativa${describeFailure(api.failure)}`);
   }
 
   return { problems, warnings };
+}
+
+/**
+ * Motivo da falha vindo da API ("failure"), em português curto.
+ * Ex.: " (HTTP 429: limite de uso do provedor, às 19:53 UTC)".
+ */
+export function describeFailure(failure, prefix = " (") {
+  if (!failure || typeof failure !== "object") return "";
+  const reasons = {
+    timeout: "sem resposta no tempo limite",
+    network: "erro de rede",
+    "invalid-response": "resposta em formato inesperado",
+  };
+  let reason = reasons[failure.kind] ?? failure.kind;
+  if (failure.kind === "http") {
+    reason = `HTTP ${failure.status}${failure.status === 429 ? ": limite de uso do provedor" : ""}`;
+  }
+  const at = typeof failure.at === "string" ? `, às ${failure.at.slice(11, 16)} UTC` : "";
+  return prefix === " (" ? ` (${reason}${at})` : `${prefix}${reason}${at}`;
 }
 
 function evaluateEnso({ ensoStatus, enso, now }, problems, warnings) {
@@ -78,7 +97,7 @@ function evaluateEnso({ ensoStatus, enso, now }, problems, warnings) {
           `El Niño – ${label}: sem busca bem-sucedida há mais de ${ENSO_MAX_FETCH_AGE_H} h (NOAA fora do ar ou formato mudou)`,
         );
       } else if (part.servedFrom === "fallback") {
-        warnings.push(`El Niño – ${label}: servindo o último dado bom (a última busca ao NOAA falhou)`);
+        warnings.push(`El Niño – ${label}: servindo o último dado bom (a última busca ao NOAA falhou${describeFailure(part.failure, "; ")})`);
       }
     }
   }
