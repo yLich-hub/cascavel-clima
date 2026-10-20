@@ -113,7 +113,7 @@ para o El Niño):
 
 ## Qualidade
 
-- **349 testes** cobrindo: validação dos provedores (com cópias reais dos arquivos do NOAA), normalização, fuso perto da
+- **365 testes** cobrindo: validação dos provedores (com cópias reais dos arquivos do NOAA), normalização, fuso perto da
   meia-noite, regras de frescor, retentativa e fallback compartilhado, estados
   da tela (fresco, velho, expirado, indisponível), cenas para todos os códigos do
   tempo, contraste WCAG no pior caso de cada cena, widgets (UV, sol, vento, curva),
@@ -132,6 +132,10 @@ para o El Niño):
   textos da página; se sim, abre uma issue (uma por boletim) com a lista do que
   revisar, e o GitHub avisa por e-mail. Ao mesmo tempo, o site já mostra um aviso no
   topo da página El Niño (e “mudou no boletim” na Início, se a situação mudar).
+- **App instalável (PWA):** manifesto (`src/app/manifest.ts`), ícones gerados de
+  `src/app/icon.svg` por `scripts/make-icons.mjs`, menu inferior no celular e um service
+  worker mínimo (`public/sw.js`) que, sem internet, mostra a página `/offline`. Nenhum dado
+  do tempo ou do El Niño fica guardado no aparelho; só os arquivos do visual do site.
 - **Segurança:** cabeçalhos CSP (parcial), HSTS, `nosniff`, `X-Frame-Options`,
   `Referrer-Policy` e `Permissions-Policy` em todas as respostas (`next.config.ts`).
 - **Lighthouse** (celular, com animações ativas, build de produção do novo visual, 15/10/2026):
@@ -235,6 +239,13 @@ cabeçalhos de segurança, teclado na lista de horas, 404 em português.
 - D3. ✅ Nova Início com widgets
 - D4. ✅ Página El Niño com cena de oceano; tema escuro em todo o site
 - D5. ✅ README, crédito ao design de referência e revisão final
+
+**Melhorias gerais:**
+
+- M1. ✅ App instalável (PWA), página sem conexão e menu inferior no celular
+- M2. Atualização automática com a aba aberta e cenas de amanhecer/entardecer
+- M3. Detalhe do dia com barras de chuva
+- M4. Pequenos ajustes
 
 **El Niño ao vivo:**
 
