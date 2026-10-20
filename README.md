@@ -74,14 +74,16 @@ Não há variáveis de ambiente obrigatórias hoje. Veja `.env.example`.
 ## Arquitetura
 
 ```
-Navegador ──▶ Next.js (servidor, Vercel) ──▶ cache (10 min) ──▶ Open-Meteo
-                         │
-                         └─ GET /api/weather (JSON normalizado)
+Navegador ──▶ Next.js (servidor, Vercel) ─┬─▶ cache (10 min) ──▶ Open-Meteo
+                         │                 └─▶ cache (6 h)    ──▶ NOAA CPC (El Niño)
+                         ├─ GET /api/weather (JSON normalizado)
+                         └─ GET /api/enso    (JSON do El Niño)
 ```
 
-Três camadas de proteção contra dado ruim ou velho:
+Três camadas de proteção contra dado ruim ou velho (as mesmas para a previsão e
+para o El Niño):
 
-1. **Serviço** (`src/lib/weather/service.ts`): timeout de 8 s, uma retentativa só
+1. **Serviço** (`src/lib/sources/resilient-source.ts`, usado por `weather/service.ts` e `enso/service.ts`): timeout de 8 s, uma retentativa só
    para erros transitórios. O último dado bom fica no Runtime Cache da Vercel
    (`last-good-store.ts`, compartilhado entre instâncias, válido por 24 h) e é
    usado como fallback se o provedor falhar.
@@ -96,19 +98,21 @@ Três camadas de proteção contra dado ruim ou velho:
 | Pasta | Conteúdo |
 |---|---|
 | `src/lib/config.ts` | Cidade, coordenadas, TTL do cache, limites de frescor, fontes oficiais |
-| `src/lib/providers/` | Chamada ao Open-Meteo com validação rígida (zod): unidades, fuso, faixas |
+| `src/lib/providers/` | Open-Meteo (validação rígida com zod: unidades, fuso, faixas) e NOAA CPC (parsers estritos dos arquivos de texto e do boletim) |
+| `src/lib/sources/` | Busca com retentativa e último dado bom, comum a todas as fontes |
+| `src/lib/enso/` | Dados do El Niño: três fontes independentes (semanal, RONI, boletim), cache de 6 h e frescor pela data do próprio dado |
 | `src/lib/weather/` | Normalização, códigos WMO em PT-BR, serviço, cache, frescor, cenas, paleta e leituras dos widgets (`insights.ts`) |
 | `src/lib/format.ts` | Formatação pt-BR com fuso explícito (`America/Sao_Paulo`) |
 | `src/components/scene/` | Cenas animadas (tempo e oceano), chuva/neve em canvas, raios |
 | `src/components/home/` | Cards de vidro e widgets da Início |
 | `src/components/` | Demais componentes da interface |
 | `src/content/el-nino.ts` | Conteúdo curado do El Niño, com fonte por afirmação |
-| `src/app/` | Páginas (`/`, `/sobre`, `/el-nino`) e `GET /api/weather` |
+| `src/app/` | Páginas (`/`, `/sobre`, `/el-nino`), `GET /api/weather` e `GET /api/enso` |
 | `tests/` | Testes (Vitest), incluindo regras de texto proibido |
 
 ## Qualidade
 
-- **269 testes** cobrindo: validação do provedor, normalização, fuso perto da
+- **315 testes** cobrindo: validação dos provedores (com cópias reais dos arquivos do NOAA), normalização, fuso perto da
   meia-noite, regras de frescor, retentativa e fallback compartilhado, estados
   da tela (fresco, velho, expirado, indisponível), cenas para todos os códigos do
   tempo, contraste WCAG no pior caso de cada cena, widgets (UV, sol, vento, curva),
@@ -117,8 +121,9 @@ Três camadas de proteção contra dado ruim ou velho:
   proibidas ("sem alertas", "causado pelo El Niño"…).
 - **CI** (`.github/workflows/ci.yml`): lint, tipos, testes e build em todo push e PR.
 - **Monitoramento** (`.github/workflows/monitor.yml` + `scripts/check-health.mjs`):
-  a cada 30 min verifica as páginas e a API publicadas; se algo cair ou a
-  previsão ficar velha, a execução falha e o GitHub avisa por e-mail. Rodar à
+  a cada 30 min verifica as páginas e as APIs publicadas; se algo cair, a
+  previsão ficar velha ou os dados do El Niño pararem de ser atualizados (NOAA
+  fora do ar ou formato dos arquivos mudou), a execução falha e o GitHub avisa por e-mail. Rodar à
   mão: `node scripts/check-health.mjs`. O GitHub desativa agendamentos de
   repositórios públicos após 60 dias sem commits (reativar na aba Actions).
 - **Segurança:** cabeçalhos CSP (parcial), HSTS, `nosniff`, `X-Frame-Options`,
@@ -166,7 +171,11 @@ PWA/app nativo, tema claro, outros idiomas, monetização.
 - **Design de referência:** [Weather & Forecasting Web Design – Gapsy Studio](https://dribbble.com/shots/25898869-Weather-Forecasting-Web-Design) (inspiração; nada do material original é usado).
 - **Alertas oficiais (só links):** [INMET – Avisos](https://avisos.inmet.gov.br/),
   [Defesa Civil do Paraná](https://www.defesacivil.pr.gov.br/).
-- **El Niño** (conteúdo curado à mão em `src/content/el-nino.ts`, conferido em 14/10/2026):
+- **Dados do El Niño, atualizados automaticamente:** [NOAA Climate Prediction Center](https://www.cpc.ncep.noaa.gov/)
+  (domínio público, governo dos EUA): [temperatura semanal das regiões Niño](https://www.cpc.ncep.noaa.gov/data/indices/wksst9120.for),
+  [RONI trimestral](https://www.cpc.ncep.noaa.gov/data/indices/RONI.ascii.txt) e situação do
+  [boletim mensal](https://www.cpc.ncep.noaa.gov/products/analysis_monitoring/enso_advisory/ensodisc.shtml).
+- **El Niño – textos** (conteúdo curado à mão em `src/content/el-nino.ts`, conferido em 14/10/2026):
   [NOAA CPC – ENSO Diagnostic Discussion](https://www.cpc.ncep.noaa.gov/products/analysis_monitoring/enso_advisory/ensodisc.shtml) (08/10/2026),
   [Painel El Niño 2026–2027, Boletim nº 4 – INPE/INMET](https://www.gov.br/inpe/pt-br/assuntos/ultimas-noticias/painel-el-nino-2026-2027-quarto-boletim-sobre-o-monitoramento-do-fenomeno-no-brasil-e-publicado) (01/10/2026),
   [Simepar](https://www.simepar.br/simepar/post/77062) (09/07/2026) e
@@ -217,3 +226,9 @@ cabeçalhos de segurança, teclado na lista de horas, 404 em português.
 - D3. ✅ Nova Início com widgets
 - D4. ✅ Página El Niño com cena de oceano; tema escuro em todo o site
 - D5. ✅ README, crédito ao design de referência e revisão final
+
+**El Niño ao vivo:**
+
+- E1. ✅ Dados automáticos do NOAA CPC + `/api/enso` + monitoramento
+- E2. Visual: status, termômetro do Pacífico, mapa das regiões, histórico
+- E3. Aviso no site quando o boletim mudar + issue automática para revisar os textos

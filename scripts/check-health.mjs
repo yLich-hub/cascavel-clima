@@ -7,19 +7,26 @@ const DEFAULT_BASE = "https://cascavel-clima.vercel.app";
 const PAGES = ["/", "/sobre", "/el-nino"];
 const TIMEOUT_MS = 20_000;
 const RETRY_DELAY_MS = 30_000;
+// Dados do El Niño são buscados a cada 6 h; sem busca bem-sucedida há 48 h, o NOAA
+// está fora do ar ou mudou o formato dos arquivos (o parser recusa e o site usa o último dado bom).
+const ENSO_MAX_FETCH_AGE_H = 48;
+const ENSO_PARTS = { weekly: "temperatura semanal", roni: "índice RONI", discussion: "boletim mensal" };
 
 /**
  * Avalia o resultado das requisições. Função pura (testada em tests/check-health.test.ts).
- * @param {{ pages: Record<string, number>, apiStatus: number, api: any }} input
+ * `ensoStatus`/`enso` são opcionais: sem eles, os dados do El Niño não são avaliados.
+ * @param {{ pages: Record<string, number>, apiStatus: number, api: any, ensoStatus?: number | string, enso?: any, now?: Date }} input
  * @returns {{ problems: string[], warnings: string[] }}
  */
-export function evaluateHealth({ pages, apiStatus, api }) {
+export function evaluateHealth({ pages, apiStatus, api, ensoStatus, enso, now = new Date() }) {
   const problems = [];
   const warnings = [];
 
   for (const [path, status] of Object.entries(pages)) {
     if (status !== 200) problems.push(`Página ${path} respondeu HTTP ${status}`);
   }
+
+  if (ensoStatus !== undefined) evaluateEnso({ ensoStatus, enso, now }, problems, warnings);
 
   if (apiStatus !== 200 || !api || typeof api !== "object") {
     problems.push(`/api/weather respondeu HTTP ${apiStatus}: previsão indisponível no site`);
@@ -49,6 +56,34 @@ export function evaluateHealth({ pages, apiStatus, api }) {
   return { problems, warnings };
 }
 
+function evaluateEnso({ ensoStatus, enso, now }, problems, warnings) {
+  if (ensoStatus !== 200 || !enso || typeof enso !== "object") {
+    problems.push(`/api/enso respondeu HTTP ${ensoStatus}: dados do El Niño indisponíveis no site`);
+    return;
+  }
+  for (const [key, label] of Object.entries(ENSO_PARTS)) {
+    const part = enso[key];
+    if (!part || typeof part !== "object") {
+      problems.push(`/api/enso sem a parte "${key}" (formato inesperado)`);
+    } else if (part.available === false && part.reason === "expired") {
+      problems.push(`El Niño – ${label}: dado velho demais, não está sendo exibido (o NOAA parou de publicar?)`);
+    } else if (part.available === false) {
+      problems.push(`El Niño – ${label}: indisponível (NOAA falhou e não há dado anterior; o formato pode ter mudado)`);
+    } else {
+      if (part.freshness?.status === "stale") warnings.push(`El Niño – ${label}: publicação do NOAA atrasada`);
+      const fetchedAt = Date.parse(part.report?.meta?.fetchedAt);
+      const ageH = (now.getTime() - fetchedAt) / 3_600_000;
+      if (Number.isNaN(fetchedAt) || ageH > ENSO_MAX_FETCH_AGE_H) {
+        problems.push(
+          `El Niño – ${label}: sem busca bem-sucedida há mais de ${ENSO_MAX_FETCH_AGE_H} h (NOAA fora do ar ou formato mudou)`,
+        );
+      } else if (part.servedFrom === "fallback") {
+        warnings.push(`El Niño – ${label}: servindo o último dado bom (a última busca ao NOAA falhou)`);
+      }
+    }
+  }
+}
+
 async function get(url) {
   const response = await fetch(url, {
     signal: AbortSignal.timeout(TIMEOUT_MS),
@@ -76,7 +111,17 @@ async function collect(base) {
   } catch (error) {
     apiStatus = `erro de rede (${error.name})`;
   }
-  return { pages, apiStatus, api };
+
+  let ensoStatus;
+  let enso = null;
+  try {
+    const response = await get(`${base}/api/enso`);
+    ensoStatus = response.status;
+    if (response.ok) enso = await response.json();
+  } catch (error) {
+    ensoStatus = `erro de rede (${error.name})`;
+  }
+  return { pages, apiStatus, api, ensoStatus, enso };
 }
 
 async function main() {
