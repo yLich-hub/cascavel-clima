@@ -28,6 +28,12 @@ const nextConfig: NextConfig = {
   cacheComponents: true,
   partialPrefetching: true,
   poweredByHeader: false,
+  experimental: {
+    // Cache do Turbopack entre builds desligado: em 20/10/2026 a Vercel restaurou o
+    // cache e publicou o CSS da versão anterior (sem o menu inferior), embora o
+    // código estivesse certo. O projeto é pequeno; um build limpo custa poucos segundos.
+    turbopackFileSystemCacheForBuild: false,
+  },
   turbopack: {
     rules: {
       "*.css": {
