@@ -171,6 +171,21 @@ body {
  * escondida na memória ao navegar.) O vidro usa a mesma cor/opacidade de
  * GLASS (scene-palette.ts); tests/contrast.test.ts confere este valor.
  * ------------------------------------------------------------------------- */
+/* Menu inferior do celular: mais opaco que o cabeçalho, porque fica sobre o
+   conteúdo rolando (texto, gráficos), não só sobre a cena. Valor testado. */
+.site-tabbar {
+  background: rgb(2 6 23 / 0.88);
+  border-color: rgb(255 255 255 / 0.15);
+  padding-bottom: env(safe-area-inset-bottom);
+  -webkit-backdrop-filter: blur(24px);
+  backdrop-filter: blur(24px);
+}
+
+/* App instalado no iPhone: a barra de status fica sobre o topo da página. */
+.site-header {
+  padding-top: env(safe-area-inset-top);
+}
+
 .site-header,
 .site-footer {
   /* Camada própria: sem isso uma cena fixa (que vem depois no HTML) cobre o cabeçalho. */

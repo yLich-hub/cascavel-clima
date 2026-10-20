@@ -1,4 +1,14 @@
-import { BookOpen, Clock, Database, Gauge, Layers, Lock, TriangleAlert, type LucideIcon } from "lucide-react";
+import {
+  BookOpen,
+  Clock,
+  Database,
+  Gauge,
+  Layers,
+  Lock,
+  Smartphone,
+  TriangleAlert,
+  type LucideIcon,
+} from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import type { ReactNode } from "react";
@@ -168,10 +178,35 @@ export default function AboutPage() {
           </ul>
         </Section>
 
+        <Section id="instalar" title="Usar como aplicativo no celular" icon={Smartphone}>
+          <P>
+            O site pode ser instalado na tela inicial e abre em tela cheia, como um aplicativo. Não é
+            preciso loja de aplicativos nem cadastro.
+          </P>
+          <ul className="mt-3 space-y-2">
+            <Item>
+              <strong>Android (Chrome):</strong> menu ⋮ → <strong>Instalar app</strong> (ou
+              “Adicionar à tela inicial”).
+            </Item>
+            <Item>
+              <strong>iPhone (Safari):</strong> botão Compartilhar → <strong>Adicionar à Tela de Início</strong>.
+            </Item>
+            <Item>
+              <strong>Computador (Chrome ou Edge):</strong> ícone de instalar na barra de endereço.
+            </Item>
+          </ul>
+          <P>
+            Sem internet, o app mostra um aviso em vez de dados antigos: nenhuma previsão fica guardada
+            no aparelho.
+          </P>
+        </Section>
+
         <Section id="privacidade" title="Privacidade" icon={Lock}>
           <P>
             Este site não usa cookies, não tem login e não coleta dados pessoais. A hospedagem pode
-            registrar dados técnicos de acesso, como endereço IP, em logs de servidor.
+            registrar dados técnicos de acesso, como endereço IP, em logs de servidor. O aplicativo
+            instalado guarda no aparelho só os arquivos do visual do site (não dados pessoais nem
+            previsões).
           </P>
         </Section>
       </main>
