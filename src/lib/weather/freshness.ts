@@ -5,6 +5,9 @@ type Rule = { staleAfterMin: number; expiredAfterMin: number };
 
 const MINUTE_MS = 60_000;
 
+/** Quantas horas os cards de "próximas horas" mostram. */
+export const HOURS_AHEAD = 24;
+
 /**
  * Classifica a idade de um dado. Limites inclusivos: exatamente 30 min ainda é
  * "fresh". Horário inválido é tratado como expirado (nunca exibir na dúvida).
@@ -47,17 +50,17 @@ export function buildWeatherView({ report, servedFrom }: WeatherResult, now: Dat
   const forecast = classifyAge(report.meta.fetchedAt, now, FRESHNESS.forecast);
   const forecastUsable = forecast.status !== "expired";
   const today = localDate(now);
+  // Chuva e probabilidade horárias do Open-Meteo referem-se à hora ANTERIOR
+  // (o ponto das 16:00 cobre 15:00–16:00). Às 15:40, o primeiro ponto útil é o das 16:00.
+  const ahead = forecastUsable ? report.hourly.filter((point) => Date.parse(point.time) > now.getTime()) : [];
 
   return {
     location: report.location,
     servedFrom,
     freshness: { current, forecast },
     current: current.status === "expired" ? null : report.current,
-    // Chuva e probabilidade horárias do Open-Meteo referem-se à hora ANTERIOR
-    // (o ponto das 16:00 cobre 15:00–16:00). Às 15:40, o primeiro ponto útil é o das 16:00.
-    hourly: forecastUsable
-      ? report.hourly.filter((point) => Date.parse(point.time) > now.getTime())
-      : [],
+    hourly: ahead.slice(0, HOURS_AHEAD),
+    hourlyAhead: ahead,
     daily: forecastUsable ? report.daily.filter((day) => day.date >= today) : [],
     meta: report.meta,
   };

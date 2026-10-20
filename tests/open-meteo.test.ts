@@ -36,7 +36,8 @@ describe("buildOpenMeteoUrl", () => {
     expect(url.searchParams.get("wind_speed_unit")).toBe("kmh");
     expect(url.searchParams.get("precipitation_unit")).toBe("mm");
     expect(url.searchParams.get("forecast_days")).toBe("7");
-    expect(url.searchParams.get("forecast_hours")).toBe("24");
+    // Horas dos 7 dias inteiros (detalhe do dia); sem recorte de 24 h no provedor.
+    expect(url.searchParams.has("forecast_hours")).toBe(false);
   });
 
   it("não envia nenhuma chave de API", () => {

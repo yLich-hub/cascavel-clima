@@ -51,8 +51,9 @@ export function buildOpenMeteoUrl(): string {
     temperature_unit: "celsius",
     wind_speed_unit: "kmh",
     precipitation_unit: "mm",
+    // Sem forecast_hours: a série horária cobre os 7 dias inteiros (00h de hoje até 23h do 7º dia),
+    // usada no detalhe de cada dia. Os cards de "próximas horas" recortam 24 h em freshness.ts.
     forecast_days: "7",
-    forecast_hours: "24",
     current: CURRENT_VARS.join(","),
     hourly: HOURLY_VARS.join(","),
     daily: DAILY_VARS.join(","),
