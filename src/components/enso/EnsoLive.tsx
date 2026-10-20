@@ -1,4 +1,5 @@
 import { connection } from "next/server";
+import { ElNinoStory } from "@/components/enso/ElNinoStory";
 import { EnsoLivePanel } from "@/components/enso/EnsoLivePanel";
 import { OceanWarm } from "@/components/scene/OceanScene";
 import { compareBulletin } from "@/lib/enso/bulletin";
@@ -10,6 +11,20 @@ import { formatDate } from "@/lib/format";
 export async function EnsoLive() {
   await connection();
   return <EnsoLivePanel view={await getEnsoView(new Date())} />;
+}
+
+/** História "O que é" com o último passo vindo do dado semanal e da situação oficial do NOAA. */
+export async function LiveStory() {
+  await connection();
+  const { weekly, discussion } = await getEnsoView(new Date());
+  const last = weekly.available ? weekly.report.weeks.at(-1) : undefined;
+  const statusLabel = discussion.available
+    ? discussion.report.discussion.statuses.map((id) => STATUS_TEXT[id].label).join(" / ")
+    : null;
+  const live = last
+    ? { valueText: formatAnomaly(last.regions.nino34.anomalyC), weekCenter: last.weekCenter, statusLabel }
+    : null;
+  return <ElNinoStory live={live} />;
 }
 
 /** "Mancha quente" da ilustração, proporcional ao valor semanal do Niño 3.4. */
