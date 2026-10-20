@@ -13,13 +13,15 @@ educativo sobre El Niño. Projeto de portfólio, sem fins comerciais.
 
 | Início (desktop) | Início (celular) |
 |---|---|
-| ![Tela Início no desktop: cena de céu parcialmente nublado, 26 °C, cards de vento, sol e índice UV](docs/screenshots/inicio-desktop.png) | ![Tela Início no celular, com o menu inferior](docs/screenshots/inicio-celular.jpg) |
-| **El Niño ao vivo (desktop)** | **El Niño ao vivo (celular)** |
-| ![Painel “Agora no Pacífico”: situação oficial do NOAA (El Niño em curso) e régua do Niño 3.4 em +3,3 °C](docs/screenshots/el-nino-desktop.png) | ![Painel “Agora no Pacífico” no celular](docs/screenshots/el-nino-celular.jpg) |
+| ![Tela Início no desktop: cena nublada, 24 °C, cards de vento, sol e índice UV, cabeçalho fixo](docs/screenshots/inicio-desktop.jpg) | ![Tela Início no celular, com o menu inferior](docs/screenshots/inicio-celular.jpg) |
+| **El Niño: história presa à rolagem (desktop)** | **El Niño: história presa à rolagem (celular)** |
+| ![Passo final da história: o mar ilustrado quente e “+3,3 °C” na região Niño 3.4, com a situação oficial do NOAA](docs/screenshots/el-nino-historia-desktop.jpg) | ![Passo “La Niña” da história no celular, com o mar ilustrado azul](docs/screenshots/el-nino-historia-celular.jpg) |
+| **El Niño: manifesto que acende (desktop)** | **El Niño: “Agora no Pacífico” (celular)** |
+| ![Frase “Um dia de chuva forte ou de calor em Cascavel não pode ser atribuído ao El Niño” em tamanho grande](docs/screenshots/el-nino-manifesto-desktop.jpg) | ![Painel ao vivo no celular: situação oficial do NOAA e régua do Niño 3.4 em +3,3 °C](docs/screenshots/el-nino-celular.jpg) |
 | **Detalhe do dia (desktop)** | **Detalhe do dia (celular)** |
-| ![Card “Detalhe do dia”: abas dos 7 dias e barras de chuva por hora](docs/screenshots/detalhe-do-dia-desktop.png) | ![Card “Detalhe do dia” no celular, com 4,6 mm previstos das 22h às 23h](docs/screenshots/detalhe-do-dia-celular.jpg) |
+| ![Card “Detalhe do dia”: abas em pílula dos 7 dias e barras de chuva por hora](docs/screenshots/detalhe-do-dia-desktop.jpg) | ![Card “Detalhe do dia” no celular, abrindo na hora mais chuvosa de amanhã](docs/screenshots/detalhe-do-dia-celular.jpg) |
 
-<sub>Capturas de 20/10/2026 do site publicado, com dados reais do momento; a cena e os números mudam com o tempo em Cascavel e os boletins do NOAA.</sub>
+<sub>Capturas de 20/10/2026 do site publicado (depois do pacote cinematográfico C1–C3), com dados reais do momento; a cena e os números mudam com o tempo em Cascavel e os boletins do NOAA.</sub>
 
 
 ## Princípios
@@ -115,7 +117,7 @@ para o El Niño):
 
 ## Qualidade
 
-- **534 testes** cobrindo: validação dos provedores (com cópias reais dos arquivos do NOAA), normalização, fuso perto da
+- **539 testes** cobrindo: validação dos provedores (com cópias reais dos arquivos do NOAA), normalização, fuso perto da
   meia-noite, regras de frescor, retentativa e fallback compartilhado, estados
   da tela (fresco, velho, expirado, indisponível), cenas para todos os códigos do
   tempo, contraste WCAG no pior caso de cada cena, widgets (UV, sol, vento, curva),
@@ -134,7 +136,9 @@ para o El Niño):
 - **Monitoramento** (`.github/workflows/monitor.yml` + `scripts/check-health.mjs`):
   a cada 30 min verifica as páginas e as APIs publicadas; se algo cair, a
   previsão ficar velha ou os dados do El Niño pararem de ser atualizados (NOAA
-  fora do ar ou formato dos arquivos mudou), a execução falha e o GitHub avisa por e-mail. Rodar à
+  fora do ar ou formato dos arquivos mudou), a execução falha e o GitHub avisa por e-mail.
+  Quando o site serve o último dado bom, o aviso diz o motivo da falha do provedor
+  (campo `failure` de `/api/weather` e `/api/enso`, ex.: “HTTP 429: limite de uso”). Rodar à
   mão: `node scripts/check-health.mjs`. O GitHub desativa agendamentos de
   repositórios públicos após 60 dias sem commits (reativar na aba Actions).
 - **Boletim do El Niño** (`.github/workflows/enso-boletim.yml` + `scripts/check-enso-bulletin.mjs`):
@@ -148,13 +152,15 @@ para o El Niño):
   do tempo ou do El Niño fica guardado no aparelho; só os arquivos do visual do site.
 - **Segurança:** cabeçalhos CSP (parcial), HSTS, `nosniff`, `X-Frame-Options`,
   `Referrer-Policy` e `Permissions-Policy` em todas as respostas (`next.config.ts`).
-- **Lighthouse 12** (celular, com animações ativas, site publicado, 20/10/2026, depois do El Niño ao vivo e das melhorias M1–M4):
+- **Lighthouse 12** (celular, com animações ativas, site publicado, 20/10/2026, depois do pacote cinematográfico; mediana de 3 medições, faixa entre parênteses):
 
   | Página | Performance | Acessibilidade | Boas práticas | SEO | CLS | LCP |
   |---|---|---|---|---|---|---|
-  | Início | 98 | 100 | 100 | 100 | 0 | 2,5 s |
-  | El Niño | 97 | 100 | 100 | 100 | 0 | 2,0 s |
-  | Sobre | 100 | 100 | 100 | 100 | 0 | 1,9 s |
+  | Início | 91 (88–96) | 100 | 100 | 100 | 0 | 2,4 s |
+  | El Niño | 93 (90–99) | 100 | 100 | 100 | 0 | 2,1 s |
+  | Sobre | 99 (96–99) | 100 | 100 | 100 | 0 | 2,0 s |
+
+  A nota de performance varia alguns pontos entre execuções (carga da máquina que mede); acessibilidade, boas práticas, SEO e CLS foram iguais nas 3.
 
 - **Segredos:** nenhuma chave no projeto; o JavaScript enviado ao navegador não
   contém referências ao provedor nem padrões de chave/token.
@@ -257,7 +263,7 @@ cabeçalhos de segurança, teclado na lista de horas, 404 em português.
 - M1. ✅ App instalável (PWA), página sem conexão e menu inferior no celular
 - M2. ✅ Atualização automática com a aba aberta (10 min na Início, 30 min no El Niño), transição suave entre cenas e céu de amanhecer/entardecer (até 40 min do nascer/pôr do sol)
 - M3. ✅ Detalhe do dia: abas com os 7 dias e chuva prevista hora a hora (barras em mm, chance e temperatura na leitura, tabela com todas as horas)
-- M4. ✅ Pequenos ajustes: telefones 199/193 no quadro de alertas, prévia ao compartilhar (`public/og.png`), robots.txt e sitemap, funções na região de São Paulo (`vercel.json`), frase de dia seco sem “até 0%”. A organização do código (busca resiliente comum e El Niño separado em dados × textos) já tinha entrado na E1.
+- M4. ✅ Pequenos ajustes: telefones 199/193 no quadro de alertas, prévia ao compartilhar (`public/og.png`), robots.txt e sitemap, funções na região de São Paulo (revertido no mesmo dia: com `gru1`, as buscas ao Open-Meteo passaram a falhar e o site serviu o último dado bom; as funções voltaram à região padrão), frase de dia seco sem “até 0%”. A organização do código (busca resiliente comum e El Niño separado em dados × textos) já tinha entrado na E1.
 
 **Pacote cinematográfico** (técnicas da skill one-shot adaptadas a um site de dados; animações com a rolagem nativa do CSS, sem biblioteca):
 
