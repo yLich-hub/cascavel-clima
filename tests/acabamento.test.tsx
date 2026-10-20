@@ -47,6 +47,14 @@ describe("grão de filme", () => {
     expect(block).toContain("position: fixed;");
   });
 
+  it("é uma imagem pequena repetida, não filtro SVG (feTurbulence custava até 300 ms de bloqueio)", () => {
+    expect(block).toContain('background-image: url("/grain.png");');
+    expect(block).not.toContain("feTurbulence");
+    const png = readFileSync("public/grain.png");
+    expect(png.subarray(1, 4).toString()).toBe("PNG");
+    expect(png.length).toBeLessThan(12 * 1024);
+  });
+
   it("some em alto contraste do sistema e na impressão", () => {
     expect(css).toMatch(/@media \(forced-colors: active\), print \{\n\s+body::after \{\n\s+display: none;/);
   });
