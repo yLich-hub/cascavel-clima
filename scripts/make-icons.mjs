@@ -1,4 +1,5 @@
-// Gera os ícones do app (manifesto, Apple e favicon) a partir de src/app/icon.svg.
+// Gera os ícones do app (manifesto, Apple e favicon) a partir de src/app/icon.svg
+// e a imagem de prévia ao compartilhar o link (public/og.png).
 // Rodar só quando o desenho mudar: node scripts/make-icons.mjs
 // O desenho fica dentro da "zona segura" (círculo de 80%), então o mesmo PNG
 // serve como ícone comum e "maskable" (Android recorta em círculo ou gota).
@@ -39,3 +40,31 @@ for (const [path, size] of [
 }
 writeFileSync("src/app/favicon.ico", ico(await png(48), 48));
 console.log("src/app/favicon.ico (48×48)");
+
+// Prévia ao compartilhar (1200×630). Sem dados do tempo de propósito: uma temperatura
+// "congelada" na imagem ficaria desatualizada nas conversas.
+const h = createElement;
+const og = h(
+  "div",
+  {
+    style: {
+      width: "100%", height: "100%", display: "flex", flexDirection: "column", justifyContent: "space-between",
+      padding: "72px 80px", color: "#ffffff",
+      background: "linear-gradient(160deg, #123a66 0%, #0b1a33 55%, #071226 100%)",
+    },
+  },
+  h("div", { style: { display: "flex", alignItems: "center", gap: 32 } },
+    h("img", { src, width: 150, height: 150, style: { borderRadius: 32 } }),
+    h("div", { style: { display: "flex", flexDirection: "column" } },
+      h("div", { style: { fontSize: 76, fontWeight: 700, lineHeight: 1.05 } }, "Clima Cascavel"),
+      h("div", { style: { fontSize: 40, opacity: 0.9 } }, "Paraná · Brasil"),
+    ),
+  ),
+  h("div", { style: { display: "flex", flexDirection: "column", gap: 14 } },
+    h("div", { style: { fontSize: 40, fontWeight: 700 } }, "Tempo agora, previsão de 7 dias e El Niño ao vivo"),
+    h("div", { style: { fontSize: 26, opacity: 0.9 } }, "Dados do Open-Meteo e do NOAA · projeto de portfólio, não é serviço oficial"),
+  ),
+);
+const ogImage = new ImageResponse(og, { width: 1200, height: 630 });
+writeFileSync("public/og.png", Buffer.from(await ogImage.arrayBuffer()));
+console.log("public/og.png (1200×630)");

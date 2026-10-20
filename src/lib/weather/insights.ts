@@ -72,8 +72,12 @@ export function describeNow(current: CurrentConditions, hourly: HourlyPoint[]): 
     .map((point) => point.precipitationProbPct)
     .filter((value): value is number => value !== null);
   if (probabilities.length > 0) {
+    const max = Math.max(...probabilities);
+    // "Chance de até 0%" soava estranho em dia seco: com 0% em todas as horas, dizemos isso.
     parts.push(
-      `Chance de chuva de até ${formatPct(Math.max(...probabilities))} nas próximas ${hourly.length} horas.`,
+      Math.round(max) === 0
+        ? `Chance de chuva de 0% em todas as próximas ${hourly.length} horas.`
+        : `Chance de chuva de até ${formatPct(max)} nas próximas ${hourly.length} horas.`,
     );
   }
   return parts.join(" ");
