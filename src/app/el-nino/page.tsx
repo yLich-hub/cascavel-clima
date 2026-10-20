@@ -54,7 +54,7 @@ export default function ElNinoPage() {
           <p className="flex items-center gap-2 text-sm font-medium text-white/90">
             <Waves aria-hidden="true" className="size-4 text-orange-300" /> Contexto climático
           </p>
-          <h1 className="mt-2 text-3xl font-bold tracking-tight sm:text-5xl">El Niño: contexto climático</h1>
+          <h1 className="display mt-2 font-bold">El Niño: contexto climático</h1>
           <p className="mt-3 max-w-prose text-base leading-relaxed">
             Esta página explica um padrão climático de grande escala, que muda probabilidades ao longo
             de meses. Ela <strong>não é previsão do tempo</strong>: para hoje e os próximos dias, veja a{" "}
@@ -180,7 +180,7 @@ function Section({
 }) {
   return (
     <Glass labelledBy={id} className="reveal p-6 sm:p-7">
-      <h2 id={id} className="flex items-center gap-2 text-xl font-bold sm:text-2xl">
+      <h2 id={id} className="headline flex items-center gap-2 font-bold">
         <Icon aria-hidden="true" className={`size-6 shrink-0 ${iconColor}`} />
         {title}
       </h2>

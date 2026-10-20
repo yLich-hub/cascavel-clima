@@ -38,8 +38,9 @@ export default function OfflinePage() {
           {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
           <a
             href="/"
-            className="glass-inner mt-5 inline-block rounded-xl px-4 py-2.5 font-medium ring-1 ring-white/30 hover:ring-white/60"
-            style={{ color: "#fff", display: "inline-block", marginTop: "1.25rem" }}
+            className="pill pill-light mt-5"
+            // Estilos em linha: a página precisa ficar legível mesmo se o CSS não estiver em cache.
+            style={{ background: "#f8fafc", color: "#020617", display: "inline-block", marginTop: "1.25rem", padding: "0.625rem 1.25rem", borderRadius: "9999px" }}
           >
             Tentar de novo
           </a>

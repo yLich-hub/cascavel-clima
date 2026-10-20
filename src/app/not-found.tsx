@@ -19,14 +19,14 @@ export default function NotFound() {
       <main className="mx-auto w-full max-w-xl px-4 pb-12 pt-10">
         <Glass as="div" className="enter-up p-6 sm:p-8">
           <p className="text-sm font-medium text-white/90">Erro 404</p>
-          <h1 className="mt-1 text-3xl font-bold tracking-tight">Página não encontrada</h1>
+          <h1 className="display mt-1 font-bold">Página não encontrada</h1>
           <p className="mt-2 text-base">O endereço que você acessou não existe ou foi movido.</p>
           <ul className="mt-5 space-y-2 text-sm">
             {LINKS.map((link) => (
               <li key={link.href}>
                 <Link
                   href={link.href}
-                  className="glass-inner block rounded-xl px-3 py-2.5 font-medium underline-offset-2 ring-1 ring-white/20 hover:underline hover:ring-white/50"
+                  className="pill pill-glass w-full justify-start"
                 >
                   {link.label}
                 </Link>

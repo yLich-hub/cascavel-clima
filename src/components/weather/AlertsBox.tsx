@@ -9,7 +9,7 @@ import { EMERGENCY_PHONES, OFFICIAL_ALERT_SOURCES } from "@/lib/config";
 export function AlertsBox({ className = "" }: { className?: string }) {
   return (
     <Glass labelledBy="alertas-oficiais" className={className}>
-      <h2 id="alertas-oficiais" className="flex items-center gap-2 text-base font-medium">
+      <h2 id="alertas-oficiais" className="card-title flex items-center gap-2">
         <Siren aria-hidden="true" className="size-5 text-red-300" />
         Alertas oficiais
       </h2>
@@ -24,7 +24,7 @@ export function AlertsBox({ className = "" }: { className?: string }) {
               href={source.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-between gap-3 glass-inner rounded-xl px-3 py-2.5 text-sm font-medium text-white underline-offset-2 ring-1 ring-white/20 hover:underline hover:ring-white/50"
+              className="pill pill-glass w-full justify-between px-4 text-left text-sm"
             >
               {source.name}
               <ExternalLink aria-hidden="true" className="size-4 shrink-0" />
@@ -41,7 +41,7 @@ export function AlertsBox({ className = "" }: { className?: string }) {
           <li key={phone.number}>
             <a
               href={`tel:${phone.number}`}
-              className="glass-inner flex items-center gap-2 rounded-xl px-3 py-2.5 text-sm text-white ring-1 ring-white/20 hover:ring-white/50"
+              className="pill pill-glass w-full justify-start px-4 text-sm"
             >
               <Phone aria-hidden="true" className="size-4 shrink-0 text-red-300" />
               <span>

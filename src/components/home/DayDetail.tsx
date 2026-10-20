@@ -40,7 +40,7 @@ export function DayDetailCard({ days, today }: { days: Day[]; today: string }) {
 
   return (
     <Glass labelledBy="detalhe-do-dia">
-      <h2 id="detalhe-do-dia" className="text-base font-medium">
+      <h2 id="detalhe-do-dia" className="card-title">
         Detalhe do dia: chuva hora a hora
       </h2>
 
@@ -61,8 +61,8 @@ export function DayDetailCard({ days, today }: { days: Day[]; today: string }) {
               tabIndex={selected ? 0 : -1}
               onClick={() => setSelectedDate(item.date)}
               onKeyDown={onTabKey}
-              className={`shrink-0 rounded-xl px-3 py-2 text-center text-sm ring-1 outline-none focus-visible:ring-2 focus-visible:ring-white ${
-                selected ? "glass-inner font-bold text-white ring-white/60" : "font-medium text-white/90 ring-white/20 hover:ring-white/40"
+              className={`pill shrink-0 flex-col gap-0 px-4 py-1.5 text-sm leading-tight outline-none focus-visible:ring-2 focus-visible:ring-white ${
+                selected ? "pill-selected" : "pill-glass"
               }`}
             >
               <span className="block">{formatDayLabel(item.date, today)}</span>
@@ -78,7 +78,7 @@ export function DayDetailCard({ days, today }: { days: Day[]; today: string }) {
         <p className="text-lg font-bold">{capitalize(formatDayLong(day.date))}</p>
         <p className="mt-1 text-sm text-white/90">
           Mínima {formatTemp(day.minC)} · máxima {formatTemp(day.maxC)} · chuva no dia {formatMm(day.precipitationSumMm)}{" "}
-          (chance de até {formatPct(day.precipitationProbMaxPct)} em alguma hora)
+          {rainChance(day.precipitationProbMaxPct)}
         </p>
         <DayHours key={day.date} day={day} isToday={day.date === today} />
       </div>
@@ -248,6 +248,12 @@ function RainBars({ hours }: { hours: HourSlot[] }) {
 function roundedTop(x: number, top: number, w: number, h: number): string {
   const r = Math.min(4, w / 2, h);
   return `M${x},${top + h}V${top + r}Q${x},${top} ${x + r},${top}H${x + w - r}Q${x + w},${top} ${x + w},${top + r}V${top + h}Z`;
+}
+
+/** "(chance de até 80% em alguma hora)"; em dia seco, sem o estranho "até 0%". */
+function rainChance(max: number | null): string {
+  if (max !== null && Math.round(max) === 0) return "(chance de 0% em todas as horas)";
+  return `(chance de até ${formatPct(max)} em alguma hora)`;
 }
 
 const capitalize = (text: string) => text.charAt(0).toUpperCase() + text.slice(1);

@@ -8,7 +8,7 @@ import type { HourlyPoint } from "@/types/weather";
 export function HourlyList({ hourly, className = "" }: { hourly: HourlyPoint[]; className?: string }) {
   return (
     <Glass labelledBy="proximas-horas" className={className}>
-      <h2 id="proximas-horas" className="text-base font-medium">
+      <h2 id="proximas-horas" className="card-title">
         Próximas horas
       </h2>
 
@@ -47,7 +47,7 @@ function HourItem({ point }: { point: HourlyPoint }) {
       <span className="text-sm text-white/90">{formatHour(point.time)}</span>
       <WeatherIcon code={point.weatherCode} isDay={point.isDay} className="size-7 text-white" />
       <span className="sr-only">{label}</span>
-      <span className="text-base font-medium">{formatTemp(point.temperatureC)}</span>
+      <span className="card-title">{formatTemp(point.temperatureC)}</span>
       <span className="flex items-center gap-0.5 text-xs text-white">
         <Droplets aria-hidden="true" className="size-3" />
         <span className="sr-only">chance de chuva</span>

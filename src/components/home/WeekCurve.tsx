@@ -15,7 +15,7 @@ export function WeekCurve({ daily, today }: { daily: DailyPoint[]; today: string
   if (daily.length === 0) {
     return (
       <Glass labelledBy="proximos-dias">
-        <h2 id="proximos-dias" className="text-base font-medium">
+        <h2 id="proximos-dias" className="card-title">
           Próximos dias
         </h2>
         <p className="mt-3 text-sm text-white/90">Previsão diária indisponível no momento.</p>
@@ -34,7 +34,7 @@ export function WeekCurve({ daily, today }: { daily: DailyPoint[]; today: string
 
   return (
     <Glass labelledBy="proximos-dias">
-      <h2 id="proximos-dias" className="text-base font-medium">
+      <h2 id="proximos-dias" className="card-title">
         Próximos dias
       </h2>
 

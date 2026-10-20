@@ -32,7 +32,7 @@ export default function AboutPage() {
     <div className="relative isolate flex-1 bg-gradient-to-b from-slate-900 to-slate-800">
       <main className="mx-auto w-full max-w-3xl space-y-5 px-4 pb-12 pt-8 lg:pt-12">
         <Glass as="div" className="enter-up p-6 sm:p-8">
-          <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">Sobre e fontes</h1>
+          <h1 className="display font-bold">Sobre e fontes</h1>
           <p className="mt-3 text-base leading-relaxed">
             Este site mostra condições atuais e previsão do tempo para {LOCATION.name} –{" "}
             {LOCATION.state}. É um projeto de portfólio, sem fins comerciais, e{" "}
@@ -229,7 +229,7 @@ function Section({
 }) {
   return (
     <Glass labelledBy={id} className="reveal p-6 sm:p-7">
-      <h2 id={id} className="flex items-center gap-2 text-xl font-bold sm:text-2xl">
+      <h2 id={id} className="headline flex items-center gap-2 font-bold">
         <Icon aria-hidden="true" className={`size-6 shrink-0 ${iconColor}`} />
         {title}
       </h2>

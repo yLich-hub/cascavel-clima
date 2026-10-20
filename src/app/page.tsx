@@ -32,16 +32,19 @@ export default function Home() {
         {/* Fora do Suspense: estático, aparece mesmo se a previsão falhar. */}
         <div className="mt-4 grid gap-4 lg:grid-cols-2">
           <AlertsBox />
-          <Glass as="div" className="flex flex-col justify-center">
-            <Link href="/el-nino" className="group block">
-              <span className="text-base font-medium group-hover:underline">El Niño: contexto climático →</span>
-              <span className="mt-1 block text-sm text-white/90">
-                Situação atualizada com dados do NOAA, o que é e o que se espera para o Paraná.
-              </span>
-            </Link>
+          <Glass labelledBy="el-nino-resumo" className="flex flex-col justify-center">
+            <h2 id="el-nino-resumo" className="card-title">
+              El Niño
+            </h2>
+            <p className="mt-1 text-sm text-white/90">
+              Situação atualizada com dados do NOAA, o que é e o que se espera para o Paraná.
+            </p>
             <Suspense fallback={null}>
               <EnsoStatusLine />
             </Suspense>
+            <Link href="/el-nino" className="pill pill-light mt-4 self-start">
+              Ver o El Niño ao vivo <span aria-hidden="true">→</span>
+            </Link>
           </Glass>
         </div>
       </main>
