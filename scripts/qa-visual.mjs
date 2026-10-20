@@ -119,9 +119,25 @@ async function launchBrowser() {
   const targets = await (await fetch(`http://127.0.0.1:${port}/json/list`)).json();
   const page = targets.find((target) => target.type === "page");
   const session = await connect(page.webSocketDebuggerUrl);
+  const exited = new Promise((resolve) => child.once("exit", resolve));
   const close = async () => {
+    // Fecha pelo próprio navegador: no Windows, matar só o processo principal deixava
+    // os processos filhos (renderização, GPU) abertos depois do QA.
+    try {
+      const { webSocketDebuggerUrl } = await (await fetch(`http://127.0.0.1:${port}/json/version`)).json();
+      const browser = await connect(webSocketDebuggerUrl);
+      browser.send("Browser.close").catch(() => {});
+      await Promise.race([exited, sleep(5000)]);
+      browser.close();
+    } catch {
+      // sem resposta: cai para o encerramento forçado abaixo
+    }
     session.close();
-    child.kill();
+    if (child.exitCode === null) {
+      if (process.platform === "win32") spawn("taskkill", ["/PID", String(child.pid), "/T", "/F"], { stdio: "ignore" });
+      else child.kill("SIGKILL");
+      await Promise.race([exited, sleep(3000)]);
+    }
     await sleep(500);
     try {
       rmSync(profile, { recursive: true, force: true });
