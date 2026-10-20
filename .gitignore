@@ -43,3 +43,6 @@ next-env.d.ts
 
 # ferramentas locais do Claude Code
 /.claude/
+
+# capturas e relatório do QA visual (scripts/qa-visual.mjs)
+/qa-out/
