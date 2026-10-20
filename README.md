@@ -13,11 +13,13 @@ educativo sobre El Niño. Projeto de portfólio, sem fins comerciais.
 
 | Início (desktop) | Início (celular) |
 |---|---|
-| ![Tela Início no desktop, cena de céu nublado](docs/screenshots/inicio-desktop.png) | ![Tela Início no celular, cena de garoa](docs/screenshots/inicio-celular.jpg) |
-| **El Niño (desktop)** | **El Niño (celular)** |
-| ![Página El Niño no desktop, cena de oceano](docs/screenshots/el-nino-desktop.png) | ![Página El Niño no celular](docs/screenshots/el-nino-celular.jpg) |
+| ![Tela Início no desktop: cena de céu parcialmente nublado, 26 °C, cards de vento, sol e índice UV](docs/screenshots/inicio-desktop.png) | ![Tela Início no celular, com o menu inferior](docs/screenshots/inicio-celular.jpg) |
+| **El Niño ao vivo (desktop)** | **El Niño ao vivo (celular)** |
+| ![Painel “Agora no Pacífico”: situação oficial do NOAA (El Niño em curso) e régua do Niño 3.4 em +3,3 °C](docs/screenshots/el-nino-desktop.png) | ![Painel “Agora no Pacífico” no celular](docs/screenshots/el-nino-celular.jpg) |
+| **Detalhe do dia (desktop)** | **Detalhe do dia (celular)** |
+| ![Card “Detalhe do dia”: abas dos 7 dias e barras de chuva por hora](docs/screenshots/detalhe-do-dia-desktop.png) | ![Card “Detalhe do dia” no celular, com 4,6 mm previstos das 22h às 23h](docs/screenshots/detalhe-do-dia-celular.jpg) |
 
-<sub>Capturas de 15/10/2026 com dados reais do momento; a cena muda com o tempo em Cascavel.</sub>
+<sub>Capturas de 20/10/2026 do site publicado, com dados reais do momento; a cena e os números mudam com o tempo em Cascavel e os boletins do NOAA.</sub>
 
 
 ## Princípios
@@ -138,13 +140,13 @@ para o El Niño):
   do tempo ou do El Niño fica guardado no aparelho; só os arquivos do visual do site.
 - **Segurança:** cabeçalhos CSP (parcial), HSTS, `nosniff`, `X-Frame-Options`,
   `Referrer-Policy` e `Permissions-Policy` em todas as respostas (`next.config.ts`).
-- **Lighthouse** (celular, com animações ativas, build de produção do novo visual, 15/10/2026):
+- **Lighthouse 12** (celular, com animações ativas, site publicado, 20/10/2026, depois do El Niño ao vivo e das melhorias M1–M4):
 
-  | Página | Performance | Acessibilidade | Boas práticas | SEO | CLS |
-  |---|---|---|---|---|---|
-  | Início | 96 | 100 | 100 | 100 | 0 |
-  | El Niño | 98 | 100 | 100 | 100 | 0 |
-  | Sobre | 98 | 100 | 100 | 100 | 0 |
+  | Página | Performance | Acessibilidade | Boas práticas | SEO | CLS | LCP |
+  |---|---|---|---|---|---|---|
+  | Início | 98 | 100 | 100 | 100 | 0 | 2,5 s |
+  | El Niño | 97 | 100 | 100 | 100 | 0 | 2,0 s |
+  | Sobre | 100 | 100 | 100 | 100 | 0 | 1,9 s |
 
 - **Segredos:** nenhuma chave no projeto; o JavaScript enviado ao navegador não
   contém referências ao provedor nem padrões de chave/token.
@@ -160,17 +162,19 @@ para o El Niño):
    `main`, exigindo que o check **CI** passe antes de mesclar um pull request.
    Assim nenhuma mudança com teste quebrado chega ao site.
 
-## Escopo da v1
+## Escopo atual
 
-**Inclui:** condições atuais, próximas 24 h, próximos 7 dias, vento das próximas
-horas, nascer/pôr do sol, índice UV, indicador de atualização, links para alertas
-oficiais, página El Niño e página Sobre/Fontes, com cenas animadas e tema escuro.
-Prioridade para o navegador do celular.
+**Inclui:** condições atuais, próximas 24 h, próximos 7 dias com detalhe de chuva
+hora a hora, vento das próximas horas, nascer/pôr do sol, índice UV, indicador de
+atualização e atualização automática, links para alertas oficiais e telefones de
+emergência, página El Niño com dados ao vivo do NOAA e aviso de boletim novo,
+página Sobre/Fontes, cenas animadas (com amanhecer e entardecer), tema escuro e
+app instalável (PWA) com página sem conexão. Prioridade para o navegador do celular.
 
-**Fora da v1** (cada item só entra com aprovação): outras cidades, login,
-notificações, integração automática de alertas do INMET, dados observados de
-estação, radar/mapas, histórico, status do El Niño automático,
-PWA/app nativo, tema claro, outros idiomas, monetização.
+**Fora do escopo** (cada item só entra com aprovação): outras cidades, login,
+notificações no celular, integração automática de alertas do INMET, dados
+observados de estação, radar/mapas, histórico, app nativo de loja, tema claro,
+outros idiomas, monetização.
 
 ## Fontes e atribuição
 
