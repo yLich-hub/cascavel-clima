@@ -207,3 +207,10 @@ describe("menu inferior do celular", () => {
     }
   });
 });
+
+describe("CSS publicado (regressão: cache de build da Vercel serviu CSS antigo)", () => {
+  it("cache do Turbopack entre builds está desligado", async () => {
+    const { default: config } = await import("../next.config");
+    expect(config.experimental?.turbopackFileSystemCacheForBuild).toBe(false);
+  });
+});
