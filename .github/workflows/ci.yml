@@ -17,7 +17,7 @@ concurrency:
 
 jobs:
   verificar:
-    name: Lint, tipos, testes e build
+    name: Lint, tipos, testes, build e QA visual
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -33,3 +33,22 @@ jobs:
       - run: npm run typecheck
       - run: npm test
       - run: npm run build
+
+      # QA visual: o site de produção recém-construído, aberto no Chrome sem janela,
+      # rolado no computador e no celular (scripts/qa-visual.mjs). Falha o CI se
+      # houver erro de console, rolagem lateral, alvo de toque pequeno ou se a
+      # história do El Niño não andar. As capturas ficam como anexo da execução.
+      - name: QA visual
+        run: |
+          npm start > next.log 2>&1 &
+          for i in $(seq 1 30); do curl -sf http://localhost:3000 > /dev/null && break; sleep 1; done
+          npm run qa -- http://localhost:3000 --out qa-out
+
+      - name: Capturas do QA visual
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: qa-visual
+          path: qa-out
+          retention-days: 7
+          if-no-files-found: ignore

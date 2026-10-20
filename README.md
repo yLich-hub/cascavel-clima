@@ -115,14 +115,22 @@ para o El Niño):
 
 ## Qualidade
 
-- **525 testes** cobrindo: validação dos provedores (com cópias reais dos arquivos do NOAA), normalização, fuso perto da
+- **534 testes** cobrindo: validação dos provedores (com cópias reais dos arquivos do NOAA), normalização, fuso perto da
   meia-noite, regras de frescor, retentativa e fallback compartilhado, estados
   da tela (fresco, velho, expirado, indisponível), cenas para todos os códigos do
   tempo, contraste WCAG no pior caso de cada cena, widgets (UV, sol, vento, curva),
   acessibilidade das listas roláveis, conteúdo do El Niño, página 404, avaliação do
   monitoramento, ausência de texto escuro no tema escuro e uma varredura de frases
   proibidas ("sem alertas", "causado pelo El Niño"…).
-- **CI** (`.github/workflows/ci.yml`): lint, tipos, testes e build em todo push e PR.
+- **CI** (`.github/workflows/ci.yml`): lint, tipos, testes, build e QA visual em todo push e PR.
+- **QA visual** (`scripts/qa-visual.mjs`, `npm run qa`): abre o site num Chrome sem janela e
+  rola Início, El Niño e Sobre no computador (1440 px) e no celular (390 px), tirando
+  capturas. Falha se houver erro de console ou de rede, rolagem lateral, alvo de toque
+  menor que 44 px, mais de um `<h1>`, fonte não carregada, se a história do El Niño não
+  passar pelos 4 passos (ou não aparecer inteira com “reduzir movimento”) ou se a página
+  mudar ao alargar a janela de 750 para 1600 px. No CI, as capturas ficam como anexo da
+  execução por 7 dias. Para rodar local: `npm run build && npm start` e, em outro
+  terminal, `npm run qa` (usa o Chrome ou o Edge instalado; `CHROME_PATH` para outro).
 - **Monitoramento** (`.github/workflows/monitor.yml` + `scripts/check-health.mjs`):
   a cada 30 min verifica as páginas e as APIs publicadas; se algo cair, a
   previsão ficar velha ou os dados do El Niño pararem de ser atualizados (NOAA
@@ -255,7 +263,7 @@ cabeçalhos de segurança, teclado na lista de horas, 404 em português.
 
 - C1. ✅ Página El Niño contada como história: cena presa à rolagem (o mar esfria e esquenta em 4 passos, o último com o dado do NOAA), manifesto que acende palavra por palavra e números que contam ao entrar na tela
 - C2. ✅ Tipografia e acabamento: escala de títulos (`display`, `headline`, `card-title`), botões e abas em pílula (fundo escuro testado), grão de filme leve e cabeçalho fixo do tablet para cima, que escurece ao rolar
-- C3. QA visual automático (capturas e checagens em várias posições de rolagem)
+- C3. ✅ QA visual automático (`npm run qa`), também no CI, com capturas como anexo
 
 **El Niño ao vivo:**
 
