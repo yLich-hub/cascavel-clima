@@ -97,7 +97,25 @@ function findBrowser() {
   return candidates.find((candidate) => existsSync(candidate));
 }
 
+/** Encerra o navegador e os processos filhos (no Windows, matar só o principal não basta). */
+function killTree(child) {
+  if (process.platform === "win32") spawn("taskkill", ["/PID", String(child.pid), "/T", "/F"], { stdio: "ignore" });
+  else child.kill("SIGKILL");
+}
+
+/** Abre o navegador; no CI a primeira partida às vezes demora ou falha, então tenta 2 vezes. */
 async function launchBrowser() {
+  for (let attempt = 1; ; attempt++) {
+    try {
+      return await launchOnce();
+    } catch (error) {
+      if (attempt >= 2) throw error;
+      console.log(`Navegador não abriu (${error.message}); tentando de novo...`);
+    }
+  }
+}
+
+async function launchOnce() {
   const executable = findBrowser();
   if (!executable) throw new Error("Chrome/Edge não encontrado. Defina CHROME_PATH.");
   const profile = mkdtempSync(path.join(os.tmpdir(), "qa-visual-"));
@@ -108,20 +126,41 @@ async function launchBrowser() {
     "--no-first-run",
     "--no-default-browser-check",
     "--hide-scrollbars",
-    ...(process.platform === "linux" ? ["--no-sandbox"] : []),
+    // Linux de CI: sem sandbox de usuário e sem depender do /dev/shm pequeno dos contêineres.
+    ...(process.platform === "linux" ? ["--no-sandbox", "--disable-dev-shm-usage"] : []),
     "about:blank",
   ];
   const child = spawn(executable, args, { stdio: "ignore" });
   const portFile = path.join(profile, "DevToolsActivePort");
-  for (let i = 0; i < 100 && !existsSync(portFile); i++) await sleep(100);
-  if (!existsSync(portFile)) throw new Error("o navegador não abriu a porta de depuração");
+  // Até 30 s: na primeira partida em uma máquina de CI o navegador pode demorar.
+  // Não olhar a saída do processo: no Windows o Edge inicial termina depois de abrir os outros.
+  for (let i = 0; i < 300 && !existsSync(portFile); i++) await sleep(100);
+  if (!existsSync(portFile)) {
+    killTree(child);
+    throw new Error(`o navegador não abriu a porta de depuração em 30 s${child.exitCode !== null ? ` (saiu com código ${child.exitCode})` : ""}`);
+  }
   const port = readFileSync(portFile, "utf8").split("\n")[0].trim();
   const targets = await (await fetch(`http://127.0.0.1:${port}/json/list`)).json();
   const page = targets.find((target) => target.type === "page");
   const session = await connect(page.webSocketDebuggerUrl);
+  const exited = new Promise((resolve) => child.once("exit", resolve));
   const close = async () => {
+    // Fecha pelo próprio navegador: no Windows, matar só o processo principal deixava
+    // os processos filhos (renderização, GPU) abertos depois do QA.
+    try {
+      const { webSocketDebuggerUrl } = await (await fetch(`http://127.0.0.1:${port}/json/version`)).json();
+      const browser = await connect(webSocketDebuggerUrl);
+      browser.send("Browser.close").catch(() => {});
+      await Promise.race([exited, sleep(5000)]);
+      browser.close();
+    } catch {
+      // sem resposta: cai para o encerramento forçado abaixo
+    }
     session.close();
-    child.kill();
+    if (child.exitCode === null) {
+      killTree(child);
+      await Promise.race([exited, sleep(3000)]);
+    }
     await sleep(500);
     try {
       rmSync(profile, { recursive: true, force: true });
