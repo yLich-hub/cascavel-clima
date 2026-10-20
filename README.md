@@ -115,7 +115,7 @@ para o El Niño):
 
 ## Qualidade
 
-- **513 testes** cobrindo: validação dos provedores (com cópias reais dos arquivos do NOAA), normalização, fuso perto da
+- **525 testes** cobrindo: validação dos provedores (com cópias reais dos arquivos do NOAA), normalização, fuso perto da
   meia-noite, regras de frescor, retentativa e fallback compartilhado, estados
   da tela (fresco, velho, expirado, indisponível), cenas para todos os códigos do
   tempo, contraste WCAG no pior caso de cada cena, widgets (UV, sol, vento, curva),
@@ -254,7 +254,7 @@ cabeçalhos de segurança, teclado na lista de horas, 404 em português.
 **Pacote cinematográfico** (técnicas da skill one-shot adaptadas a um site de dados; animações com a rolagem nativa do CSS, sem biblioteca):
 
 - C1. ✅ Página El Niño contada como história: cena presa à rolagem (o mar esfria e esquenta em 4 passos, o último com o dado do NOAA), manifesto que acende palavra por palavra e números que contam ao entrar na tela
-- C2. Tipografia mais forte e acabamento (pílulas, grão, cabeçalho)
+- C2. ✅ Tipografia e acabamento: escala de títulos (`display`, `headline`, `card-title`), botões e abas em pílula (fundo escuro testado), grão de filme leve e cabeçalho fixo do tablet para cima, que escurece ao rolar
 - C3. QA visual automático (capturas e checagens em várias posições de rolagem)
 
 **El Niño ao vivo:**

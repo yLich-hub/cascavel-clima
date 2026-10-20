@@ -42,7 +42,7 @@ export function MobileNav() {
 export function HeaderLinks() {
   const pathname = usePathname();
   return (
-    <div className="hidden items-center gap-4 text-sm font-medium text-white sm:flex">
+    <div className="hidden items-center gap-2 text-white sm:flex">
       {NAV_ITEMS.filter((item) => item.href !== "/").map(({ href, label }) => {
         const active = isActive(pathname, href);
         return (
@@ -50,7 +50,7 @@ export function HeaderLinks() {
             key={href}
             href={href}
             aria-current={active ? "page" : undefined}
-            className={`underline-offset-4 hover:underline ${active ? "underline decoration-orange-300 decoration-2" : ""}`}
+            className={`pill pill-sm ${active ? "pill-selected" : "hover:ring-1 hover:ring-white/30"}`}
           >
             {label}
           </Link>

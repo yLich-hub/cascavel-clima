@@ -128,6 +128,10 @@ describe("DayDetailCard", () => {
   it("dia seco e dia sem horas têm mensagens próprias", () => {
     const dry = renderToStaticMarkup(<DayDetailCard days={[sample[1]]} today="2026-10-20" />);
     expect(dry).toContain("Nenhuma hora com chuva prevista");
+    // Resumo do dia seco sem "até 0%" (máxima de 5% vira "até 5%"; 0% vira "em todas as horas").
+    const zero = renderToStaticMarkup(<DayDetailCard days={[{ ...sample[1], precipitationProbMaxPct: 0 }]} today="2026-10-20" />);
+    expect(zero).toContain("chance de 0% em todas as horas");
+    expect(zero).not.toContain("até 0%");
     const empty = renderToStaticMarkup(<DayDetailCard days={[sample[2]]} today="2026-10-20" />);
     expect(empty).toContain("Previsão hora a hora indisponível para este dia.");
   });

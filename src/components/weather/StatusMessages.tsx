@@ -20,7 +20,7 @@ export function FallbackNotice({ fetchedAt }: { fetchedAt: string }) {
 export function WeatherUnavailable() {
   return (
     <Glass labelledBy="indisponivel">
-      <h2 id="indisponivel" className="text-base font-medium">
+      <h2 id="indisponivel" className="card-title">
         Previsão indisponível no momento
       </h2>
       <p className="mt-2 text-sm text-white">

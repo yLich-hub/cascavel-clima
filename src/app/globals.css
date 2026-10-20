@@ -18,6 +18,124 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  /* Geist com espaçamento levemente fechado, como nas páginas de produto da Apple. */
+  letter-spacing: -0.008em;
+}
+
+/* Altura do cabeçalho fixo (só do tablet para cima; no celular a navegação é o menu inferior). */
+:root {
+  --header-h: 0px;
+}
+
+@media (min-width: 640px) {
+  :root {
+    --header-h: calc(3.5rem + 1px + env(safe-area-inset-top));
+  }
+}
+
+html {
+  /* Âncoras (#secao) não ficam escondidas atrás do cabeçalho fixo. */
+  scroll-padding-top: var(--header-h);
+}
+
+/* Escala de títulos: grandes, peso forte e letras mais juntas; quebra de linha equilibrada. */
+@utility display {
+  font-size: clamp(2.25rem, 6.2vw, 4.25rem);
+  line-height: 1;
+  letter-spacing: -0.04em;
+  text-wrap: balance;
+}
+
+@utility headline {
+  font-size: clamp(1.375rem, 2.8vw, 2rem);
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+}
+
+@utility card-title {
+  font-size: 1.125rem;
+  line-height: 1.3;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+/* ---------------------------------------------------------------------------
+ * Botões e abas em pílula (o único formato de botão do site).
+ * .pill-glass usa o mesmo fundo escuro dos balões (.glass-inner, INNER testado):
+ * clarear o fundo derrubaria o contraste do texto branco nas cenas claras.
+ * ------------------------------------------------------------------------- */
+@layer components {
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 2.75rem;
+    padding: 0.625rem 1.25rem;
+    border-radius: 9999px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    transition: box-shadow 180ms ease, background-color 180ms ease, transform 180ms ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .pill:active {
+    transform: scale(0.97);
+  }
+
+  .pill-sm {
+    min-height: 2.25rem;
+    padding: 0.375rem 0.875rem;
+    font-size: 0.875rem;
+  }
+
+  .pill-glass {
+    background: rgb(2 6 23 / 0.25);
+    box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.2);
+    color: #ffffff;
+  }
+
+  .pill-selected {
+    background: rgb(2 6 23 / 0.25);
+    box-shadow: inset 0 0 0 1.5px rgb(255 255 255 / 0.8);
+    color: #ffffff;
+    font-weight: 700;
+  }
+
+  /* Ação principal: fundo claro e texto escuro (contraste 19:1). */
+  .pill-light {
+    background: #f8fafc;
+    color: #020617;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .pill-glass:hover {
+      box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.55);
+    }
+
+    .pill-light:hover {
+      background: #ffffff;
+    }
+  }
+}
+
+/* Grão de filme bem leve sobre tudo: textura estática, sem custo na rolagem.
+   Some em alto contraste do sistema e na impressão. */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  opacity: 0.04;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+
+@media (forced-colors: active), print {
+  body::after {
+    display: none;
+  }
 }
 
 /* ---------------------------------------------------------------------------
@@ -224,6 +342,21 @@ body {
   backdrop-filter: blur(24px);
 }
 
+/* Do tablet para cima, o cabeçalho acompanha a rolagem; ao rolar, fica mais escuro e ganha sombra. */
+@media (min-width: 640px) {
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    transition: background-color 200ms ease, box-shadow 200ms ease;
+  }
+
+  html[data-scrolled] .site-header {
+    background: rgb(2 6 23 / 0.7);
+    box-shadow: 0 12px 32px -16px rgb(0 0 0 / 0.7);
+  }
+}
+
 /* ---------------------------------------------------------------------------
  * Página El Niño: oceano com ondas e "mancha quente" (ilustração), entrada
  * animada e seções que aparecem ao rolar. Tudo desligado com movimento reduzido.
@@ -333,8 +466,9 @@ body {
 
     .story-stage {
       position: sticky;
-      top: 0;
-      height: 100svh;
+      /* Logo abaixo do cabeçalho fixo (tablet e computador). */
+      top: var(--header-h);
+      height: calc(100svh - var(--header-h));
       display: grid;
       grid-template-rows: minmax(0, 36%) minmax(0, 1fr);
       gap: 1rem;
