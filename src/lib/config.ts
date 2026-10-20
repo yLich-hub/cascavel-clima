@@ -44,3 +44,24 @@ export const OFFICIAL_ALERT_SOURCES = [
     url: "https://www.parana.pr.gov.br/servicos/Seguranca/Defesa-Civil/Receber-alertas-da-Defesa-Civil-por-SMS-ERrZ4PN6",
   },
 ] as const;
+
+/**
+ * Dados do El Niño (NOAA CPC). Mudam devagar: semanal e mensal. Buscar a cada
+ * 6 h basta para mostrar um dado novo poucas horas depois de publicado.
+ */
+export const ENSO_CACHE_TTL_SECONDS = 6 * 60 * 60;
+
+/**
+ * Frescor dos dados do El Niño, em dias, contados a partir da data do PRÓPRIO
+ * dado (não de quando buscamos): o centro da semana, o fim do trimestre e a
+ * data do boletim. Folgas pensadas no ritmo normal de publicação do CPC:
+ * - semanal: sai ~5 dias após o centro da semana; 14 dias = perdeu uma semana;
+ * - RONI: sai até ~10 dias após o fim do trimestre; 45 dias = perdeu um mês;
+ * - boletim: sai uma vez por mês; 40 dias = atrasou.
+ * Expirado = não exibir o valor.
+ */
+export const ENSO_FRESHNESS_DAYS = {
+  weekly: { staleAfter: 14, expiredAfter: 35 },
+  roni: { staleAfter: 45, expiredAfter: 100 },
+  discussion: { staleAfter: 40, expiredAfter: 75 },
+} as const;

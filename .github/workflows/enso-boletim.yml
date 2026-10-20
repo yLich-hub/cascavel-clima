@@ -1,0 +1,32 @@
+# Duas vezes por dia, confere se o NOAA publicou um boletim do El Niño mais novo
+# que o usado nos textos da página. Se sim, abre uma issue (uma por boletim) e o
+# GitHub avisa o dono do repositório por e-mail.
+#
+# O boletim sai uma vez por mês (segunda quinta-feira, por volta das 13h UTC) e o
+# site busca os dados a cada 6 h, então duas verificações diárias bastam.
+# Agendamentos do GitHub podem atrasar; para rodar à mão: aba Actions → Run workflow.
+name: Boletim do El Niño
+
+on:
+  schedule:
+    - cron: "17 14,22 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  verificar:
+    name: Boletim novo do NOAA?
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: node scripts/check-enso-bulletin.mjs
+        env:
+          SITE_URL: https://cascavel-clima.vercel.app
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

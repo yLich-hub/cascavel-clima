@@ -1,6 +1,7 @@
 import "server-only";
 import { z } from "zod";
-import { LOCATION, PROVIDER_TIMEOUT_MS } from "@/lib/config";
+import { LOCATION } from "@/lib/config";
+import { ProviderError, request, type FetchOptions } from "@/lib/providers/http";
 
 /**
  * Cliente do Open-Meteo (https://open-meteo.com/en/docs).
@@ -161,25 +162,8 @@ export type OpenMeteoResponse = z.infer<typeof openMeteoResponseSchema>;
 
 // --- Erros --------------------------------------------------------------------
 
-export type ProviderErrorKind = "timeout" | "network" | "http" | "invalid-response";
-
-export class ProviderError extends Error {
-  constructor(
-    readonly kind: ProviderErrorKind,
-    message: string,
-    readonly status?: number,
-  ) {
-    super(message);
-    this.name = "ProviderError";
-  }
-
-  /** Vale tentar de novo? Erros 4xx (exceto 429) e resposta inválida não. */
-  get retryable(): boolean {
-    if (this.kind === "timeout" || this.kind === "network") return true;
-    if (this.kind === "http") return this.status === 429 || (this.status ?? 0) >= 500;
-    return false;
-  }
-}
+// ProviderError mora em http.ts (comum a todos os provedores); reexportado aqui por compatibilidade.
+export { ProviderError, type ProviderErrorKind } from "@/lib/providers/http";
 
 // --- Chamada ------------------------------------------------------------------
 
@@ -191,32 +175,8 @@ export function parseOpenMeteoResponse(json: unknown): OpenMeteoResponse {
   return result.data;
 }
 
-type FetchOptions = {
-  fetchImpl?: typeof fetch;
-  timeoutMs?: number;
-};
-
-export async function fetchOpenMeteo({
-  fetchImpl = fetch,
-  timeoutMs = PROVIDER_TIMEOUT_MS,
-}: FetchOptions = {}): Promise<OpenMeteoResponse> {
-  let response: Response;
-  try {
-    response = await fetchImpl(buildOpenMeteoUrl(), {
-      headers: { accept: "application/json" },
-      signal: AbortSignal.timeout(timeoutMs),
-    });
-  } catch (error) {
-    if (error instanceof Error && error.name === "TimeoutError") {
-      throw new ProviderError("timeout", `sem resposta em ${timeoutMs} ms`);
-    }
-    throw new ProviderError("network", error instanceof Error ? error.message : String(error));
-  }
-
-  if (!response.ok) {
-    throw new ProviderError("http", `HTTP ${response.status}`, response.status);
-  }
-
+export async function fetchOpenMeteo(options: FetchOptions = {}): Promise<OpenMeteoResponse> {
+  const response = await request(buildOpenMeteoUrl(), { ...options, accept: "application/json" });
   let json: unknown;
   try {
     json = await response.json();

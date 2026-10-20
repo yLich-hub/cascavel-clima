@@ -14,16 +14,21 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { connection } from "next/server";
 import { Suspense, type ReactNode } from "react";
+import { BulletinNotice } from "@/components/enso/BulletinNotice";
+import { EnsoLive, LiveOceanWarm } from "@/components/enso/EnsoLive";
+import { EnsoLiveSkeleton, LIVE_SECTION } from "@/components/enso/EnsoLivePanel";
 import { Glass } from "@/components/home/Glass";
-import { OceanScene } from "@/components/scene/OceanScene";
+import { OceanScene, OceanWarm } from "@/components/scene/OceanScene";
 import { EL_NINO, SOURCES, isReviewOverdue, type SourceId, type Statement } from "@/content/el-nino";
+import { compareBulletin } from "@/lib/enso/bulletin";
+import { getEnsoView } from "@/lib/enso/get-enso";
 import { formatDate } from "@/lib/format";
 import { localDate } from "@/lib/weather/freshness";
 
 export const metadata: Metadata = {
   title: "El Niño",
   description:
-    "Contexto educativo sobre o El Niño e o que as fontes oficiais esperam para o Sul do Brasil e o Paraná.",
+    "Situação do El Niño atualizada automaticamente com dados do NOAA, contexto educativo e o que as fontes oficiais esperam para o Sul do Brasil e o Paraná.",
 };
 
 /** Cor de destaque de cada fase (só na borda e no ícone; o texto é sempre branco). */
@@ -37,7 +42,14 @@ export default function ElNinoPage() {
   return (
     <div className="relative isolate flex-1 bg-slate-950">
       <div className="fixed inset-0 -z-10">
-        <OceanScene />
+        {/* A mancha quente cresce conforme o dado semanal; até ele chegar, não aparece. */}
+        <OceanScene
+          warm={
+            <Suspense fallback={<OceanWarm warmth={0} />}>
+              <LiveOceanWarm />
+            </Suspense>
+          }
+        />
       </div>
 
       <main className="mx-auto w-full max-w-4xl space-y-5 px-4 pb-12 pt-8 lg:pt-12">
@@ -64,8 +76,14 @@ export default function ElNinoPage() {
         </Glass>
 
         <Suspense fallback={null}>
-          <ReviewNotice />
+          <ContentNotice />
         </Suspense>
+
+        <Section id={LIVE_SECTION.id} title={LIVE_SECTION.title} icon={LIVE_SECTION.icon}>
+          <Suspense fallback={<EnsoLiveSkeleton />}>
+            <EnsoLive />
+          </Suspense>
+        </Section>
 
         <Section id="o-que-e" title="O que é" icon={BookOpen}>
           <Statements items={EL_NINO.whatIs} />
@@ -86,8 +104,12 @@ export default function ElNinoPage() {
           </ul>
         </Section>
 
-        <Section id="situacao" title="Situação atual" icon={Thermometer}>
-          <p className="text-lg font-bold">{EL_NINO.status.headline}</p>
+        <Section id="situacao" title="O que dizem os boletins" icon={Thermometer}>
+          <p className="text-sm text-white/90">
+            Resumo feito à mão a partir dos boletins, conferido em {formatDate(EL_NINO.reviewedAt)}. Os
+            números ao vivo estão em “{LIVE_SECTION.title}”, acima.
+          </p>
+          <p className="mt-2 text-lg font-bold">{EL_NINO.status.headline}</p>
           <ul className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {EL_NINO.highlights.map((item) => (
               <li
@@ -131,7 +153,8 @@ export default function ElNinoPage() {
           <p className="mt-4 text-sm text-white/90">
             Conteúdo conferido nas fontes em {formatDate(EL_NINO.reviewedAt)}. Próximo boletim do NOAA
             previsto para {formatDate(EL_NINO.nextExpectedUpdate)}. Textos resumidos e traduzidos a
-            partir das fontes. O oceano ao fundo é uma ilustração e não representa dados.
+            partir das fontes. O oceano ao fundo é uma ilustração; só o tamanho da mancha quente acompanha o
+            valor semanal da região Niño 3.4 (quanto mais quente, maior, até +3 °C).
           </p>
         </Section>
       </main>
@@ -139,9 +162,17 @@ export default function ElNinoPage() {
   );
 }
 
-/** Calculado por requisição: avisa quando o conteúdo pode estar desatualizado. */
-async function ReviewNotice() {
+/**
+ * Calculado por requisição. Prioridade: boletim novo do NOAA (com ou sem
+ * mudança de situação) > prazo de revisão vencido > nada.
+ */
+async function ContentNotice() {
   await connection();
+  const { discussion } = await getEnsoView(new Date());
+  if (discussion.available) {
+    const change = compareBulletin(discussion.report.discussion);
+    if (change.kind !== "none") return <BulletinNotice change={change} />;
+  }
   if (!isReviewOverdue(localDate(new Date()))) return null;
   return (
     <Glass as="div" className="ring-amber-300/60">
