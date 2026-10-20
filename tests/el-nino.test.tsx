@@ -91,7 +91,8 @@ describe("página El Niño", () => {
 
   it("cita a fonte em cada afirmação e em cada número em destaque", () => {
     const citations = html.match(/\(Fonte:/g) ?? [];
-    expect(citations).toHaveLength(allStatements.length + EL_NINO.highlights.length);
+    // +1: o passo "El Niño" da história cita o NOAA ao falar do limite de +0,5 °C.
+    expect(citations).toHaveLength(allStatements.length + EL_NINO.highlights.length + 1);
   });
 
   it("títulos em negrito e nenhum texto escuro (fundo escuro)", () => {

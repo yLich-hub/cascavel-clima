@@ -1,6 +1,7 @@
 import { Activity, ExternalLink } from "lucide-react";
 import type { ReactNode } from "react";
 import { AnomalyChart, type ChartPoint } from "@/components/enso/AnomalyChart";
+import { CountUpText } from "@/components/motion/CountUp";
 import {
   DIVERGING,
   NINO_REGIONS,
@@ -119,7 +120,7 @@ function WeeklyBlock({ part }: { part: EnsoPart<WeeklyNinoReport> }) {
   return (
     <Block title={`Temperatura do mar na região Niño 3.4 – semana de ${formatDate(last.weekCenter)}`}>
       <p className="flex flex-wrap items-baseline gap-x-3">
-        <span className="text-5xl font-bold tracking-tight">{formatAnomaly(value)}</span>
+        <CountUpText text={formatAnomaly(value)} className="text-5xl font-bold tracking-tight" />
         <span className="text-base">{relation(value)} de 1991–2020</span>
       </p>
       <Gauge value={value} />
@@ -260,7 +261,7 @@ function RoniBlock({ part }: { part: EnsoPart<RoniReport> }) {
   return (
     <Block title="Índice oficial de 3 meses (RONI)">
       <p className="flex flex-wrap items-baseline gap-x-3">
-        <span className="text-4xl font-bold tracking-tight">{formatAnomaly(last.value, 2)}</span>
+        <CountUpText text={formatAnomaly(last.value, 2)} className="text-4xl font-bold tracking-tight" />
         <span className="text-base">no trimestre {last.label}</span>
       </p>
       <p className="mt-3 max-w-prose text-sm leading-relaxed text-white/90">

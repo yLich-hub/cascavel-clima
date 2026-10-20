@@ -1,10 +1,7 @@
 import {
   BookOpen,
   CloudRain,
-  Equal,
-  Info,
   MapPin,
-  Snowflake,
   Thermometer,
   TriangleAlert,
   Waves,
@@ -15,10 +12,13 @@ import Link from "next/link";
 import { connection } from "next/server";
 import { Suspense, type ReactNode } from "react";
 import { BulletinNotice } from "@/components/enso/BulletinNotice";
-import { EnsoLive, LiveOceanWarm } from "@/components/enso/EnsoLive";
+import { ElNinoStory } from "@/components/enso/ElNinoStory";
+import { EnsoLive, LiveOceanWarm, LiveStory } from "@/components/enso/EnsoLive";
 import { EnsoLiveSkeleton, LIVE_SECTION } from "@/components/enso/EnsoLivePanel";
+import { Manifesto } from "@/components/enso/Manifesto";
 import { Glass } from "@/components/home/Glass";
 import { AutoRefresh } from "@/components/layout/AutoRefresh";
+import { CountUpText } from "@/components/motion/CountUp";
 import { OceanScene, OceanWarm } from "@/components/scene/OceanScene";
 import { EL_NINO, SOURCES, isReviewOverdue, type SourceId, type Statement } from "@/content/el-nino";
 import { compareBulletin } from "@/lib/enso/bulletin";
@@ -30,13 +30,6 @@ export const metadata: Metadata = {
   title: "El Niño",
   description:
     "Situação do El Niño atualizada automaticamente com dados do NOAA, contexto educativo e o que as fontes oficiais esperam para o Sul do Brasil e o Paraná.",
-};
-
-/** Cor de destaque de cada fase (só na borda e no ícone; o texto é sempre branco). */
-const PHASES: Record<string, { icon: LucideIcon; accent: string; iconColor: string }> = {
-  "El Niño": { icon: Thermometer, accent: "border-orange-400", iconColor: "text-orange-300" },
-  "La Niña": { icon: Snowflake, accent: "border-sky-400", iconColor: "text-sky-300" },
-  Neutro: { icon: Equal, accent: "border-slate-300", iconColor: "text-slate-200" },
 };
 
 export default function ElNinoPage() {
@@ -71,40 +64,23 @@ export default function ElNinoPage() {
             .
           </p>
 
-          <Callout icon={Info} accent="border-sky-300" iconColor="text-sky-300" className="mt-5">
-            <strong>Um dia de chuva forte ou de calor em Cascavel não pode ser atribuído ao El Niño</strong>{" "}
-            apenas com base nestas informações. O El Niño muda as chances de certos padrões ao longo de
-            uma estação; atribuir um evento específico a ele exige estudo técnico próprio.
-          </Callout>
         </Glass>
 
         <Suspense fallback={null}>
           <ContentNotice />
         </Suspense>
 
+        {/* "O que é" contado como cena; o último passo usa o dado semanal do NOAA. */}
+        <Suspense fallback={<ElNinoStory live={null} />}>
+          <LiveStory />
+        </Suspense>
+
+        <Manifesto />
+
         <Section id={LIVE_SECTION.id} title={LIVE_SECTION.title} icon={LIVE_SECTION.icon}>
           <Suspense fallback={<EnsoLiveSkeleton />}>
             <EnsoLive />
           </Suspense>
-        </Section>
-
-        <Section id="o-que-e" title="O que é" icon={BookOpen}>
-          <Statements items={EL_NINO.whatIs} />
-          <ul className="mt-4 grid gap-3 sm:grid-cols-3">
-            {EL_NINO.phases.map((phase) => {
-              const style = PHASES[phase.name];
-              const Icon = style.icon;
-              return (
-                <li key={phase.name} className={`glass-inner rounded-2xl border-t-4 p-4 ring-1 ring-white/20 ${style.accent}`}>
-                  <p className="flex items-center gap-2 text-lg font-bold">
-                    <Icon aria-hidden="true" className={`size-5 ${style.iconColor}`} />
-                    {phase.name}
-                  </p>
-                  <p className="mt-1 text-sm">{phase.text}</p>
-                </li>
-              );
-            })}
-          </ul>
         </Section>
 
         <Section id="situacao" title="O que dizem os boletins" icon={Thermometer}>
@@ -119,7 +95,9 @@ export default function ElNinoPage() {
                 key={item.label}
                 className="glass-inner rounded-2xl border-l-4 border-orange-400 p-4 ring-1 ring-white/20"
               >
-                <p className="text-3xl font-bold tracking-tight">{item.value}</p>
+                <p className="text-3xl font-bold tracking-tight">
+                  <CountUpText text={item.value} />
+                </p>
                 <p className="mt-1 text-sm">{item.label}</p>
                 <p className="mt-2 text-sm text-white/90">
                   <Citation id={item.source} />
