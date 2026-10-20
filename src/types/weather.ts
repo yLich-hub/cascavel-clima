@@ -97,7 +97,10 @@ export type WeatherView = {
   servedFrom: ServedFrom;
   freshness: { current: Freshness; forecast: Freshness };
   current: CurrentConditions | null;
+  /** Próximas 24 h (cards de horas, vento e resumo). */
   hourly: HourlyPoint[];
+  /** Todas as horas ainda por vir, até o fim do 7º dia (detalhe de cada dia). */
+  hourlyAhead: HourlyPoint[];
   daily: DailyPoint[];
   meta: DataMeta;
 };

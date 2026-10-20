@@ -1,3 +1,4 @@
+import { DayDetailCard } from "@/components/home/DayDetail";
 import { Glass } from "@/components/home/Glass";
 import { Hero } from "@/components/home/Hero";
 import { SunCard } from "@/components/home/SunCard";
@@ -7,6 +8,7 @@ import { WindCard } from "@/components/home/WindCard";
 import { FreshnessBadge } from "@/components/weather/FreshnessBadge";
 import { HourlyList } from "@/components/weather/HourlyList";
 import { FallbackNotice, SourceNote } from "@/components/weather/StatusMessages";
+import { dayDetails } from "@/lib/weather/days";
 import { localDate } from "@/lib/weather/freshness";
 import type { WeatherView } from "@/types/weather";
 
@@ -37,6 +39,12 @@ export function HomeDashboard({ view, now }: { view: WeatherView; now: Date }) {
       <div className="lg:col-span-2">
         <WeekCurve daily={view.daily} today={today} />
       </div>
+
+      {view.daily.length > 0 && (
+        <div className="lg:col-span-2">
+          <DayDetailCard days={dayDetails(view.daily, view.hourlyAhead)} today={today} />
+        </div>
+      )}
 
       <HourlyList hourly={view.hourly} className="lg:col-span-2" />
 

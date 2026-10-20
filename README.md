@@ -113,7 +113,7 @@ para o El Niño):
 
 ## Qualidade
 
-- **473 testes** cobrindo: validação dos provedores (com cópias reais dos arquivos do NOAA), normalização, fuso perto da
+- **490 testes** cobrindo: validação dos provedores (com cópias reais dos arquivos do NOAA), normalização, fuso perto da
   meia-noite, regras de frescor, retentativa e fallback compartilhado, estados
   da tela (fresco, velho, expirado, indisponível), cenas para todos os códigos do
   tempo, contraste WCAG no pior caso de cada cena, widgets (UV, sol, vento, curva),
@@ -244,7 +244,7 @@ cabeçalhos de segurança, teclado na lista de horas, 404 em português.
 
 - M1. ✅ App instalável (PWA), página sem conexão e menu inferior no celular
 - M2. ✅ Atualização automática com a aba aberta (10 min na Início, 30 min no El Niño), transição suave entre cenas e céu de amanhecer/entardecer (até 40 min do nascer/pôr do sol)
-- M3. Detalhe do dia com barras de chuva
+- M3. ✅ Detalhe do dia: abas com os 7 dias e chuva prevista hora a hora (barras em mm, chance e temperatura na leitura, tabela com todas as horas)
 - M4. Pequenos ajustes
 
 **El Niño ao vivo:**
