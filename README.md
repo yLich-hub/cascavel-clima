@@ -113,7 +113,7 @@ para o El Niño):
 
 ## Qualidade
 
-- **337 testes** cobrindo: validação dos provedores (com cópias reais dos arquivos do NOAA), normalização, fuso perto da
+- **349 testes** cobrindo: validação dos provedores (com cópias reais dos arquivos do NOAA), normalização, fuso perto da
   meia-noite, regras de frescor, retentativa e fallback compartilhado, estados
   da tela (fresco, velho, expirado, indisponível), cenas para todos os códigos do
   tempo, contraste WCAG no pior caso de cada cena, widgets (UV, sol, vento, curva),
@@ -127,6 +127,11 @@ para o El Niño):
   fora do ar ou formato dos arquivos mudou), a execução falha e o GitHub avisa por e-mail. Rodar à
   mão: `node scripts/check-health.mjs`. O GitHub desativa agendamentos de
   repositórios públicos após 60 dias sem commits (reativar na aba Actions).
+- **Boletim do El Niño** (`.github/workflows/enso-boletim.yml` + `scripts/check-enso-bulletin.mjs`):
+  duas vezes por dia confere se o NOAA publicou boletim mais novo que o usado nos
+  textos da página; se sim, abre uma issue (uma por boletim) com a lista do que
+  revisar, e o GitHub avisa por e-mail. Ao mesmo tempo, o site já mostra um aviso no
+  topo da página El Niño (e “mudou no boletim” na Início, se a situação mudar).
 - **Segurança:** cabeçalhos CSP (parcial), HSTS, `nosniff`, `X-Frame-Options`,
   `Referrer-Policy` e `Permissions-Policy` em todas as respostas (`next.config.ts`).
 - **Lighthouse** (celular, com animações ativas, build de produção do novo visual, 15/10/2026):
@@ -187,10 +192,13 @@ PWA/app nativo, tema claro, outros idiomas, monetização.
 1. Leia o boletim mais recente do NOAA CPC (mensal) e do Painel El Niño (INPE/INMET).
 2. Edite `src/content/el-nino.ts`: textos, `publishedAt` de cada fonte, `reviewedAt` e
    `nextExpectedUpdate`. Toda afirmação precisa de uma fonte (`source`).
-3. Rode `npm test`: os testes conferem fontes, datas e frases proibidas.
+3. Edite `src/content/el-nino-bulletin.json` com a data e a situação do boletim do NOAA
+   que você usou. Isso tira o aviso de “boletim novo” do site.
+4. Rode `npm test`: os testes conferem fontes, datas e frases proibidas (e que o
+   boletim do JSON é o mesmo citado como fonte).
 
-A página mostra um aviso automático se passar a data do próximo boletim ou 45 dias
-desde a revisão.
+A página mostra um aviso automático quando sai boletim novo do NOAA (destacado se a
+situação mudar), ou se passar a data do próximo boletim ou 45 dias desde a revisão.
 
 ## Verificações da Etapa 0 (2026-10-14)
 
@@ -232,4 +240,4 @@ cabeçalhos de segurança, teclado na lista de horas, 404 em português.
 
 - E1. ✅ Dados automáticos do NOAA CPC + `/api/enso` + monitoramento
 - E2. ✅ Painel “Agora no Pacífico”: situação oficial, régua do Niño 3.4, 52 semanas, 4 regiões e RONI (gráficos com tabela e teclado); mancha quente do oceano ligada ao dado; resumo na Início
-- E3. Aviso no site quando o boletim mudar + issue automática para revisar os textos
+- E3. ✅ Aviso no site quando sai boletim novo (destaque se a situação mudar) + issue automática para revisar os textos

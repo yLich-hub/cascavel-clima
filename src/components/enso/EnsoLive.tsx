@@ -1,6 +1,7 @@
 import { connection } from "next/server";
 import { EnsoLivePanel } from "@/components/enso/EnsoLivePanel";
 import { OceanWarm } from "@/components/scene/OceanScene";
+import { compareBulletin } from "@/lib/enso/bulletin";
 import { getEnsoView } from "@/lib/enso/get-enso";
 import { STATUS_TEXT, formatAnomaly, oceanWarmth } from "@/lib/enso/present";
 import { formatDate } from "@/lib/format";
@@ -26,8 +27,9 @@ export async function EnsoStatusLine() {
   const lines: string[] = [];
   if (discussion.available) {
     const { statuses, issuedOn } = discussion.report.discussion;
+    const changed = compareBulletin(discussion.report.discussion).kind === "status-changed";
     lines.push(
-      `Situação oficial do NOAA: ${statuses.map((id) => STATUS_TEXT[id].label).join(" / ")} (boletim de ${formatDate(issuedOn)}).`,
+      `Situação oficial do NOAA: ${statuses.map((id) => STATUS_TEXT[id].label).join(" / ")} (${changed ? "mudou no " : ""}boletim de ${formatDate(issuedOn)}).`,
     );
   }
   const last = weekly.available ? weekly.report.weeks.at(-1) : undefined;

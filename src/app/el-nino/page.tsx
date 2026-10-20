@@ -14,11 +14,14 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { connection } from "next/server";
 import { Suspense, type ReactNode } from "react";
+import { BulletinNotice } from "@/components/enso/BulletinNotice";
 import { EnsoLive, LiveOceanWarm } from "@/components/enso/EnsoLive";
 import { EnsoLiveSkeleton, LIVE_SECTION } from "@/components/enso/EnsoLivePanel";
 import { Glass } from "@/components/home/Glass";
 import { OceanScene, OceanWarm } from "@/components/scene/OceanScene";
 import { EL_NINO, SOURCES, isReviewOverdue, type SourceId, type Statement } from "@/content/el-nino";
+import { compareBulletin } from "@/lib/enso/bulletin";
+import { getEnsoView } from "@/lib/enso/get-enso";
 import { formatDate } from "@/lib/format";
 import { localDate } from "@/lib/weather/freshness";
 
@@ -73,7 +76,7 @@ export default function ElNinoPage() {
         </Glass>
 
         <Suspense fallback={null}>
-          <ReviewNotice />
+          <ContentNotice />
         </Suspense>
 
         <Section id={LIVE_SECTION.id} title={LIVE_SECTION.title} icon={LIVE_SECTION.icon}>
@@ -159,9 +162,17 @@ export default function ElNinoPage() {
   );
 }
 
-/** Calculado por requisição: avisa quando o conteúdo pode estar desatualizado. */
-async function ReviewNotice() {
+/**
+ * Calculado por requisição. Prioridade: boletim novo do NOAA (com ou sem
+ * mudança de situação) > prazo de revisão vencido > nada.
+ */
+async function ContentNotice() {
   await connection();
+  const { discussion } = await getEnsoView(new Date());
+  if (discussion.available) {
+    const change = compareBulletin(discussion.report.discussion);
+    if (change.kind !== "none") return <BulletinNotice change={change} />;
+  }
   if (!isReviewOverdue(localDate(new Date()))) return null;
   return (
     <Glass as="div" className="ring-amber-300/60">
