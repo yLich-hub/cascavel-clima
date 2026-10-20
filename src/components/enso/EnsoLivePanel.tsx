@@ -181,10 +181,11 @@ function Gauge({ value }: { value: number }) {
           </span>
         ))}
       </div>
-      <div className="flex justify-between text-xs text-white/90">
+      {/* Três colunas iguais: no celular cada legenda quebra dentro da sua coluna, sem encostar na vizinha. */}
+      <div className="grid grid-cols-3 gap-3 text-xs leading-snug text-white/90">
         <span>mais frio (La Niña)</span>
-        <span>faixa neutra ±0,5 °C</span>
-        <span>mais quente (El Niño)</span>
+        <span className="text-center">faixa neutra ±0,5&nbsp;°C</span>
+        <span className="text-right">mais quente (El Niño)</span>
       </div>
     </div>
   );
