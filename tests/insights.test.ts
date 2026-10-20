@@ -73,6 +73,12 @@ describe("describeNow", () => {
     );
   });
 
+  it("dia seco: diz 0% em todas as horas, em vez de \"até 0%\"", () => {
+    const text = describeNow(current, [hour("t1", 0, 5), hour("t2", 0.4, 5)]);
+    expect(text).toContain("Chance de chuva de 0% em todas as próximas 2 horas.");
+    expect(text).not.toContain("até 0%");
+  });
+
   it("sem probabilidades, não fala de chuva (nunca inventa 0%)", () => {
     expect(describeNow(current, [hour("t1", null, 5)])).not.toContain("Chance de chuva");
   });

@@ -14,6 +14,9 @@ export const LOCATION = {
   timezone: "America/Sao_Paulo",
 } as const;
 
+/** Endereço público do site (links absolutos: compartilhamento, sitemap, robots). */
+export const SITE_URL = "https://cascavel-clima.vercel.app";
+
 /** Por quanto tempo uma resposta do provedor é reaproveitada antes de buscar de novo. */
 export const CACHE_TTL_SECONDS = 10 * 60;
 
@@ -34,6 +37,12 @@ export const ATTRIBUTION = {
     licenseUrl: "https://open-meteo.com/en/licence",
   },
 } as const;
+
+/** Telefones de emergência no Brasil (ligação gratuita). */
+export const EMERGENCY_PHONES = [
+  { number: "199", name: "Defesa Civil" },
+  { number: "193", name: "Corpo de Bombeiros" },
+] as const;
 
 /** Fontes oficiais de alerta. Este site não emite nem interpreta alertas. */
 export const OFFICIAL_ALERT_SOURCES = [

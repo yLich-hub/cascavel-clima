@@ -1,6 +1,6 @@
-import { ExternalLink, Siren } from "lucide-react";
+import { ExternalLink, Phone, Siren } from "lucide-react";
 import { Glass } from "@/components/home/Glass";
-import { OFFICIAL_ALERT_SOURCES } from "@/lib/config";
+import { EMERGENCY_PHONES, OFFICIAL_ALERT_SOURCES } from "@/lib/config";
 
 /**
  * Este site NÃO emite, resume nem verifica alertas. Nunca exibir "sem alertas":
@@ -29,6 +29,24 @@ export function AlertsBox({ className = "" }: { className?: string }) {
               {source.name}
               <ExternalLink aria-hidden="true" className="size-4 shrink-0" />
               <span className="sr-only">(abre em nova aba)</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+      <p className="mt-4 text-sm text-white">
+        <strong>Em situação de emergência, ligue:</strong>
+      </p>
+      <ul className="mt-2 grid grid-cols-2 gap-2">
+        {EMERGENCY_PHONES.map((phone) => (
+          <li key={phone.number}>
+            <a
+              href={`tel:${phone.number}`}
+              className="glass-inner flex items-center gap-2 rounded-xl px-3 py-2.5 text-sm text-white ring-1 ring-white/20 hover:ring-white/50"
+            >
+              <Phone aria-hidden="true" className="size-4 shrink-0 text-red-300" />
+              <span>
+                <strong className="text-base">{phone.number}</strong> {phone.name}
+              </span>
             </a>
           </li>
         ))}

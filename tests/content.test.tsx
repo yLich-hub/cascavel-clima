@@ -60,9 +60,16 @@ describe("AlertsBox", () => {
     for (const source of OFFICIAL_ALERT_SOURCES) {
       expect(html).toContain(`href="${source.url}"`);
     }
-    const external = html.match(/<a [^>]*>/g) ?? [];
+    const external = (html.match(/<a [^>]*>/g) ?? []).filter((tag) => tag.includes("https://"));
     expect(external).toHaveLength(OFFICIAL_ALERT_SOURCES.length);
     for (const tag of external) expect(tag).toContain('rel="noopener noreferrer"');
+  });
+
+  it("telefones de emergência 199 e 193 com link para ligar", () => {
+    expect(html).toContain('href="tel:199"');
+    expect(html).toContain('href="tel:193"');
+    expect(html).toContain("Defesa Civil");
+    expect(html).toContain("Corpo de Bombeiros");
   });
 
   it("tem o id usado pelo link da tela 'indisponível'", () => {
