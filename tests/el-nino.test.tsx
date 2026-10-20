@@ -76,6 +76,12 @@ describe("isReviewOverdue", () => {
 describe("página El Niño", () => {
   const html = renderToStaticMarkup(<ElNinoPage />);
 
+  it("tem a seção ao vivo (carregada à parte) e explica o que a ilustração representa", () => {
+    expect(html).toContain("Agora no Pacífico");
+    expect(html).toContain("Carregando dados do NOAA");
+    expect(html).toContain("só o tamanho da mancha quente acompanha o");
+  });
+
   it("deixa claro que não é previsão do tempo", () => {
     expect(html).toContain("não é previsão do tempo");
   });
@@ -87,7 +93,7 @@ describe("página El Niño", () => {
 
   it("títulos em negrito e nenhum texto escuro (fundo escuro)", () => {
     expect(html).toMatch(/<h1 class="[^"]*font-bold/);
-    expect(html.match(/<h2[^>]*font-bold/g)?.length).toBe(5);
+    expect(html.match(/<h2[^>]*font-bold/g)?.length).toBe(6);
     expect(html).not.toMatch(/text-(zinc|slate|sky)-[6-9]00/);
   });
 

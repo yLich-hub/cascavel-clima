@@ -103,6 +103,7 @@ para o El Niño):
 | `src/lib/enso/` | Dados do El Niño: três fontes independentes (semanal, RONI, boletim), cache de 6 h e frescor pela data do próprio dado |
 | `src/lib/weather/` | Normalização, códigos WMO em PT-BR, serviço, cache, frescor, cenas, paleta e leituras dos widgets (`insights.ts`) |
 | `src/lib/format.ts` | Formatação pt-BR com fuso explícito (`America/Sao_Paulo`) |
+| `src/components/enso/` | Painel ao vivo do El Niño e gráfico de anomalias (cores validadas, tabela e navegação por teclado) |
 | `src/components/scene/` | Cenas animadas (tempo e oceano), chuva/neve em canvas, raios |
 | `src/components/home/` | Cards de vidro e widgets da Início |
 | `src/components/` | Demais componentes da interface |
@@ -112,7 +113,7 @@ para o El Niño):
 
 ## Qualidade
 
-- **315 testes** cobrindo: validação dos provedores (com cópias reais dos arquivos do NOAA), normalização, fuso perto da
+- **337 testes** cobrindo: validação dos provedores (com cópias reais dos arquivos do NOAA), normalização, fuso perto da
   meia-noite, regras de frescor, retentativa e fallback compartilhado, estados
   da tela (fresco, velho, expirado, indisponível), cenas para todos os códigos do
   tempo, contraste WCAG no pior caso de cada cena, widgets (UV, sol, vento, curva),
@@ -230,5 +231,5 @@ cabeçalhos de segurança, teclado na lista de horas, 404 em português.
 **El Niño ao vivo:**
 
 - E1. ✅ Dados automáticos do NOAA CPC + `/api/enso` + monitoramento
-- E2. Visual: status, termômetro do Pacífico, mapa das regiões, histórico
+- E2. ✅ Painel “Agora no Pacífico”: situação oficial, régua do Niño 3.4, 52 semanas, 4 regiões e RONI (gráficos com tabela e teclado); mancha quente do oceano ligada ao dado; resumo na Início
 - E3. Aviso no site quando o boletim mudar + issue automática para revisar os textos

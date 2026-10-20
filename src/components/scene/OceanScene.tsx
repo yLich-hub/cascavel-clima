@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { OCEAN, rgb, veilGradient, warmGradient } from "@/lib/weather/scene-palette";
 
 /**
@@ -18,10 +19,27 @@ const LAYERS = [
 ];
 
 /**
- * Fundo da página El Niño: céu noturno, "mancha quente" no Pacífico e ondas.
- * Ilustração decorativa (`aria-hidden`); a página avisa que não representa dados.
+ * "Mancha quente" no Pacífico. `warmth` (0 a 1) controla tamanho e opacidade;
+ * nunca passa do máximo da paleta, então o contraste testado continua valendo.
  */
-export function OceanScene() {
+export function OceanWarm({ warmth = 1 }: { warmth?: number }) {
+  return (
+    <div
+      data-warmth={warmth.toFixed(2)}
+      className="ocean-warm-scale absolute inset-0"
+      style={{ transform: `scale(${0.45 + 0.55 * warmth})`, opacity: warmth > 0 ? 0.35 + 0.65 * warmth : 0 }}
+    >
+      <div className="ocean-warm" style={{ background: warmGradient() }} />
+    </div>
+  );
+}
+
+/**
+ * Fundo da página El Niño: céu noturno, "mancha quente" no Pacífico e ondas.
+ * Ilustração decorativa (`aria-hidden`). A mancha pode vir de fora (`warm`),
+ * já ligada ao dado semanal; sem ela, usa a ilustração padrão.
+ */
+export function OceanScene({ warm }: { warm?: ReactNode } = {}) {
   const [top, bottom] = OCEAN.sky;
   return (
     <div
@@ -30,7 +48,7 @@ export function OceanScene() {
       className="absolute inset-0 overflow-hidden"
       style={{ background: `linear-gradient(180deg, ${top} 0%, ${bottom} 60%)`, containerType: "size" }}
     >
-      <div className="ocean-warm" style={{ background: warmGradient() }} />
+      {warm ?? <OceanWarm />}
       {LAYERS.map((layer) => (
         <svg
           key={layer.top}

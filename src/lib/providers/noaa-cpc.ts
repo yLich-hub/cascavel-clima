@@ -1,4 +1,5 @@
 import "server-only";
+import { CPC_URLS } from "@/lib/enso/urls";
 import { ProviderError, requestText, type FetchOptions } from "@/lib/providers/http";
 import type {
   EnsoAlertStatus,
@@ -21,11 +22,7 @@ import type {
  * - mensal (segunda quinta-feira): boletim "ENSO Diagnostic Discussion".
  */
 
-export const CPC_URLS = {
-  weekly: "https://www.cpc.ncep.noaa.gov/data/indices/wksst9120.for",
-  roni: "https://www.cpc.ncep.noaa.gov/data/indices/RONI.ascii.txt",
-  discussion: "https://www.cpc.ncep.noaa.gov/products/analysis_monitoring/enso_advisory/ensodisc.shtml",
-} as const;
+export { CPC_URLS };
 
 /** Quanto do histórico guardar: o suficiente para os gráficos, sem pesar no cache. */
 export const KEEP_WEEKS = 52;

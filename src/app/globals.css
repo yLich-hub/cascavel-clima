@@ -267,13 +267,34 @@ body {
   }
 }
 
+/* Tamanho da mancha quente acompanha o dado semanal (OceanWarm); ancorada no centro da mancha. */
+.ocean-warm-scale {
+  transform-origin: 75% 55%;
+  transition: transform 1.6s ease-out, opacity 1.6s ease-out;
+}
+
+/* Régua do Niño 3.4: a faixa cresce a partir do zero ao abrir a página. */
+.gauge-fill {
+  animation: gauge-grow 1.2s cubic-bezier(0.2, 0.7, 0.2, 1) 0.2s both;
+}
+
+@keyframes gauge-grow {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .ocean-wave,
   .ocean-warm,
   .enter-up,
   .enter-sweep,
+  .gauge-fill,
   .reveal {
     animation: none !important;
+  }
+
+  .ocean-warm-scale {
+    transition: none;
   }
 }
 

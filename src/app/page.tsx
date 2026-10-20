@@ -6,6 +6,7 @@ import { HomeDashboard } from "@/components/home/HomeDashboard";
 import { WeatherScene } from "@/components/scene/WeatherScene";
 import { AlertsBox } from "@/components/weather/AlertsBox";
 import { WeatherUnavailable, WeatherSkeleton } from "@/components/weather/StatusMessages";
+import { EnsoStatusLine } from "@/components/enso/EnsoLive";
 import { LOCATION } from "@/lib/config";
 import { buildWeatherView } from "@/lib/weather/freshness";
 import { getWeather } from "@/lib/weather/get-weather";
@@ -31,9 +32,12 @@ export default function Home() {
             <Link href="/el-nino" className="group block">
               <span className="text-base font-medium group-hover:underline">El Niño: contexto climático →</span>
               <span className="mt-1 block text-sm text-white/90">
-                O que é, a situação atual segundo as fontes oficiais e o que se espera para o Paraná.
+                Situação atualizada com dados do NOAA, o que é e o que se espera para o Paraná.
               </span>
             </Link>
+            <Suspense fallback={null}>
+              <EnsoStatusLine />
+            </Suspense>
           </Glass>
         </div>
       </main>
